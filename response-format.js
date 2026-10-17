@@ -56,14 +56,29 @@
     return normalize(text).replace(/\[\[choices\]\][\s\S]*?\[\[\/choices\]\]/i, "").trim();
   }
 
+  const knownIconNames = Object.freeze([
+    "brain","search","check","warning","idea","code","clock","memory","globe","eye","heart",
+    "settings","question","music","microphone","sparkles","file","folder","image","video",
+    "camera","lock","shield","key","user","users","bot","terminal","database","network","wifi",
+    "download","upload","send","message","bell","calendar","list","filter","sliders","refresh",
+    "zap","activity","battery","power","bug","alert","x","plus","minus","external","link","pin",
+    "map","location","sun","moon","cloud","server","cpu","wrench","hammer","package","book",
+    "bookmark","clipboard","pencil","trash","save","shieldcheck","fingerprint","ban","checkcircle",
+    "xcircle","info","help","trophy","flag","target","coffee","gift","smile","frown","skull","ghost",
+    "flame","eyeoff","wand","layers","chart","pulse","robot","hourglass","thermometer","rocket",
+    "satellite","fingerprint2"
+  ]);
+
   function userExplicitlyAskedForImages(text) {
     const value = String(text || "");
+    if (/\b(?:do not|don't|dont|never|without|avoid|no)\b.{0,70}\b(?:any\s+)?(?:images?|pictures?|photos?|wallpapers?|illustrations?)\b/i.test(value) ||
+        /\b(?:images?|pictures?|photos?)\b.{0,35}\b(?:not|aren't|are not|shouldn't|should not)\s+(?:shown|included|displayed)\b/i.test(value)) return false;
     return /\b(show|find|search for|generate|create|make|give me|display|send)\b.{0,45}\b(images?|pictures?|photos?|wallpapers?|illustrations?|visual references?)\b/i.test(value) ||
       /\b(images?|pictures?|photos?|wallpapers?|illustrations?)\b.{0,35}\b(of|for|show|generate|create|find|please)\b/i.test(value) ||
       /\bwhat does .{2,70} look like\b/i.test(value);
   }
 
   window.OracleResponseFormat = Object.freeze({
-    classify, normalize, getChoiceBlock, parseChoices, stripChoiceBlock, userExplicitlyAskedForImages
+    classify, normalize, getChoiceBlock, parseChoices, stripChoiceBlock, userExplicitlyAskedForImages, knownIconNames
   });
 })();
