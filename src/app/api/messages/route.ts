@@ -144,10 +144,14 @@ export async function POST(request: NextRequest) {
     const baseUrl = (process.env.ORACLE_API_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
     const configuredModel = process.env.ORACLE_MODEL || "openai/gpt-oss-120b";
     const hasImageAttachments = attachments.some(file => !!file && typeof file.type === "string" && file.type.startsWith("image/") && typeof file.data === "string" && file.data.startsWith("data:image/"));
-    // Groq's general text model rejects multimodal message content. Route image questions to its current vision-capable model.
-    const model = hasImageAttachments && /groq\.com/i.test(baseUrl)
+    const lastUserText = [...validMessages].reverse().find(item => item.role === "user")?.content || "";
+    const isWebSearchRequest = /\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/i.test(lastUserText);
+    // Groq's general text model rejects multimodal content; Compound can search the live web.
+    const model = /groq\.com/i.test(baseUrl) && hasImageAttachments
       ? "qwen/qwen3.6-27b"
-      : configuredModel === "llama-3.3-70b-versatile" ? "openai/gpt-oss-120b" : configuredModel;
+      : /groq\.com/i.test(baseUrl) && isWebSearchRequest
+        ? "groq/compound"
+        : configuredModel === "llama-3.3-70b-versatile" ? "openai/gpt-oss-120b" : configuredModel;
     const upstream = await fetch(baseUrl + "/chat/completions", {
       method: "POST",
       headers: {
