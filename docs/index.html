@@ -231,6 +231,7 @@ const info=()=>{const current=window.ORACLE_API_URL||localStorage.getItem('oracl
 $('menuBtn').addEventListener('click',()=>{$('sidebar').classList.add('open');$('backdrop').classList.add('show')});$('backdrop').addEventListener('click',closeMenu);
 // Load saved conversations before the first chat is used.
 loadChats();
+openChat(activeChatId);
 // Permanent public backend endpoint. The secret API key stays on Vercel.
 window.ORACLE_API_URL = 'https://oracle-sepia-one.vercel.app/api/messages';
 // Set this to the deployed backend URL after deploying the Next.js API, e.g.
