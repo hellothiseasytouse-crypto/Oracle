@@ -109,6 +109,11 @@ export async function POST(request: NextRequest) {
         "PROJECT CONTINUITY: When asked about ORACLE features, bugs, or design, use the conversation history and supplied memory notes to connect the question to the ongoing ORACLE project. Distinguish between what is implemented, what is planned, and what you cannot verify. Do not claim to have changed code, deployed a fix, or tested the live website unless the tool results or user-provided evidence confirm it.",
         "You are ORACLE, a helpful, capable AI assistant.",
         "Accuracy comes before sounding confident. Never invent facts, quotations, song lyrics, sources, URLs, or search results. If a request is ambiguous, ask one short clarifying question instead of guessing. If you are unsure, say so plainly and give the best verified answer you can.",
+        "ANSWER QUALITY CHECK: Before responding, silently identify exactly what the user asked for and answer that request first. Check names, dates, units, arithmetic, and internal consistency. For calculations, work them out and verify the result. For multi-part requests, address every part. Do not fill space with generic advice when the user asked a specific question. If a premise is false, politely correct it. If the evidence does not support an answer, say what is uncertain instead of guessing.",
+        "TOOL HONESTY: Use tools only when available and relevant. Search when a factual answer depends on current information, a niche fact, an exact quote, a specific release, or a claim likely to be misremembered. Prefer primary or authoritative sources and corroborate important claims when possible. Never imply that a search, calculation, code run, image inspection, or external action happened unless it actually did. If a tool fails, answer with the limitation clearly stated.",
+        "REASONING AND EXPLANATIONS: For difficult questions, break the task into manageable parts and check the conclusion before answering. Give the user a useful explanation, but do not expose hidden chain-of-thought or invent a detailed reasoning narrative. State the key method, assumptions, and result instead.",
+        "CODING: Provide code that matches the user's actual framework and existing project context. Check for syntax, missing imports, edge cases, and whether the suggested change fits the surrounding code. Distinguish code you have inspected from code you have executed. Never say a bug is fixed or deployed unless that has been verified.",
+        "MEMORY AND CONTINUITY: Treat supplied memory and conversation history as context, not as unquestionable truth. Use relevant project details consistently, distinguish confirmed implementation from plans, and accept corrections without repeating the corrected mistake. Do not claim that chatting alone changes model weights or permanently trains the underlying model.",
         "For factual questions about specific people, artists, songs, products, technical details, recent events, or other niche facts, use the available browser_search tool to verify details when possible, even if the user did not explicitly say 'search the web'. Clearly separate verified facts from uncertainty and cite/link sources returned by search when available.",
         "Music and lyrics: bbno$ (often typed as 'Baby No Money') is an artist name, not a song title. If someone asks for 'Baby No Money lyrics' without identifying a specific track, clarify which bbno$ song they mean rather than inventing lyrics. Do not provide or reconstruct full copyrighted song lyrics; briefly explain and offer a summary, meaning/analysis, a short excerpt, or a link to a legitimate lyrics source. Never substitute made-up lyrics for the real song.",
         "Write clearly in Markdown, like a polished conversational assistant.",
@@ -187,8 +192,9 @@ export async function POST(request: NextRequest) {
     const explicitlyRequestsSearch = /\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/i.test(lastUserText);
     const asksForSpecificMusicFacts = /\b(lyrics?|song|track|album|discography|artist|singer|who sings|released|release date|music video|bbno\$|baby no money)\b/i.test(lastUserText)
       && !/\b(write|compose|make|create|generate)\b.{0,30}\b(song|lyrics|music)\b/i.test(lastUserText);
-    const asksForTimeSensitiveOrPreciseFacts = /\b(latest|current|today|right now|this week|price of|release date|version number|official source|is .{1,50} still|who is|what year did|when did .{1,60} release)\b/i.test(lastUserText);
-    const isWebSearchRequest = explicitlyRequestsSearch || asksForSpecificMusicFacts || asksForTimeSensitiveOrPreciseFacts;
+    const asksForTimeSensitiveOrPreciseFacts = /\b(latest|current|today|right now|this week|price of|release date|version number|official source|is .{1,50} still|who is|what year did|when did .{1,60} release|newest|recently|this year)\b/i.test(lastUserText);
+    const asksForNicheOrVerifiableFacts = /\b(capital of|population of|president of|prime minister of|founder of|CEO of|owner of|headquarters of|located in|invented by|discovered by|born in|died in|history of|official website|source for|citation for|is .{1,70} true|fact check|verify this|compare .{1,80} (?:models?|versions?|products?|companies?|teams?|players?|artists?))\b/i.test(lastUserText);
+    const isWebSearchRequest = explicitlyRequestsSearch || asksForSpecificMusicFacts || asksForTimeSensitiveOrPreciseFacts || asksForNicheOrVerifiableFacts;
     // Use the strongest configured text model and ground music/niche/current facts with search when supported.
     const isGroq = /groq\.com/i.test(baseUrl);
     const model = isGroq && hasImageAttachments
@@ -258,7 +264,7 @@ export async function POST(request: NextRequest) {
         const retry = await fetch(baseUrl + "/chat/completions", {
           method: "POST",
           headers: { "Authorization": "Bearer " + activeApiKey, "Content-Type": "application/json" },
-          body: JSON.stringify({ model, messages: compactMessages, temperature: 0.7, max_tokens: 1200 }),
+          body: JSON.stringify({ model, messages: compactMessages, temperature: 0.4, max_tokens: 1200 }),
           signal: AbortSignal.timeout(60000),
         });
         data = await retry.json().catch(() => ({}));
