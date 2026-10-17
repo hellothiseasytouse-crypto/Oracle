@@ -37,7 +37,7 @@ function parseApiKeys(raw: string, baseUrl: string): string[] {
     value.trim()
       .replace(/^Bearer\s+/i, "")
       .replace(/^(?:\d+[.)]|[-*])/, "")
-      .replace(/^["'\`]+|["'\`]+$/g, "")
+      .replace(/^["']+|["']+$/g, "")
       .trim()
   ).filter(Boolean);
   return [...new Set(keys)];
@@ -188,11 +188,13 @@ export async function POST(request: NextRequest) {
     const useBrowserSearch = isGroq && isWebSearchRequest && !hasImageAttachments;
     let upstream: Response | null = null;
     let activeApiKey = apiKeys[0];
+    let attemptedKeys = 0;
     let data: any = {};
     let lastProviderError = "No configured API key could complete the request.";\n    let lastProviderStatus = 0;
     // Try keys in configured order. Quota/rate-limit/auth failures are key-specific;
     // do not change the loading/thinking UI on the client while this loop runs.
     for (const apiKey of apiKeys) {
+      attemptedKeys += 1;
       activeApiKey = apiKey;
       const candidate = await fetch(baseUrl + "/chat/completions", {
         method: "POST",
@@ -229,7 +231,7 @@ export async function POST(request: NextRequest) {
       data = candidateData;
     }
     if (!upstream) {
-      return NextResponse.json({ error: `All ${apiKeys.length} configured API key(s) were tried. Last provider response: ${lastProviderError}`, code: "API_KEY_POOL_REJECTED", attemptedKeys: apiKeys.length, providerStatus: lastProviderStatus || undefined }, { status: 503, headers });
+      return NextResponse.json({ error: `Tried ${attemptedKeys} of ${apiKeys.length} configured API key(s). Last provider response: ${lastProviderError}`, code: "API_KEY_POOL_REJECTED", attemptedKeys, providerStatus: lastProviderStatus || undefined }, { status: 503, headers });
     }
     // `data` is the response from the first key that succeeded, or the last failure.
     if (!upstream.ok) {
