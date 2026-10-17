@@ -714,7 +714,12 @@ async function send(){
 function endpointSafeError(err){return err&&err.message?err.message:'A network error occurred.'}
 function newChat(){saveCurrent();const id=makeId();const chat={id,title:'New conversation',messages:[],updatedAt:Date.now()};chats.unshift(chat);activeChatId=id;conversation=chat.messages;messages.replaceChildren();welcome.classList.remove('hidden');$('modeNotice').classList.remove('hidden');prompt.value='';attached=[];updateAttachments();saveChats();renderHistory();prompt.focus();if(window.innerWidth<=760)closeMenu()}
 function addChoiceButtons(answer,bubble,userText=''){
- const options=window.OracleResponseFormat?.parseChoices(answer)||[];
+ let options=window.OracleResponseFormat?.parseChoices(answer)||[];
+ const explicitlyAsked=/\b(give|show|make|add|provide|use|want)\b.{0,40}\b(choice buttons?|multiple[- ]choice|options buttons?|clickable options?)\b/i.test(String(userText||''));
+ if(options.length<2&&explicitlyAsked){
+  options=String(answer||'').split(/\r?\n/).map(line=>line.trim()).filter(line=>/^(?:[-*+•]|\d+[.)])\s+/.test(line)).map(line=>line.replace(/^(?:[-*+•]|\d+[.)])\s+/,'').replace(/\*\*/g,'').trim()).filter((line,i,all)=>line&&line.length<=90&&all.indexOf(line)===i).slice(0,6);
+  if(options.length<2)options=['Simple answer','Detailed answer','Show an example'];
+ }
  if(options.length<2)return;
  const wrap=document.createElement('div');wrap.className='oracle-choice-list';
  const label=document.createElement('div');label.className='oracle-choice-label';label.textContent='Choose an option';wrap.appendChild(label);
