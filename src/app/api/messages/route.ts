@@ -74,8 +74,14 @@ export async function POST(request: NextRequest) {
   // Parse key pools defensively: users may paste one key per line, comma/semicolon
   // separated keys, quoted keys, or numbered lists. Groq keys are extracted by their
   // known prefix so labels, numbering, and punctuation cannot corrupt them.
-  const baseUrl = (process.env.ORACLE_API_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
   const rawKeyPool = [process.env.ORACLE_API_KEYS || "", process.env.ORACLE_API_KEY || ""].join("\n");
+  const configuredBaseUrl = process.env.ORACLE_API_BASE_URL?.trim();
+  const hasGroqKeys = /\bgsk_[A-Za-z0-9_-]+\b/.test(rawKeyPool);
+  // Groq keys must never be sent to OpenAI's API. If the URL is missing or
+  // accidentally left at OpenAI while Groq keys are configured, choose Groq.
+  const baseUrl = (hasGroqKeys && (!configuredBaseUrl || /api\.openai\.com/i.test(configuredBaseUrl))
+    ? "https://api.groq.com/openai/v1"
+    : configuredBaseUrl || "https://api.openai.com/v1").replace(/\/$/, "");
   const apiKeys = parseApiKeys(rawKeyPool, baseUrl);
   if (!apiKeys.length) {
     return NextResponse.json(
