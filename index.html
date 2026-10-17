@@ -765,8 +765,32 @@ function openStoragePage(){
  const file=document.createElement('input');file.type='file';file.accept='application/json,.json';file.hidden=true;file.addEventListener('change',()=>{importBackup(file.files&&file.files[0]);file.value=''});
  const importBtn=button('↑ Restore from backup','secondary',()=>file.click());
  const persistBtn=button('Keep site data available','secondary',async()=>{if(navigator.storage&&navigator.storage.persist){try{const granted=await navigator.storage.persist();status.textContent=granted?'The browser granted persistent-storage permission.':'The browser did not grant persistent-storage permission; keep regular backups.'}catch{status.textContent='This browser could not change storage persistence settings.'}}else status.textContent='Persistent storage permission is not supported in this browser.'});
+ async function cloudSync(mode){
+  try{
+   loadAccountSettings();
+   const client=await getSupabase();
+   const {data:{user},error:userError}=await client.auth.getUser();
+   if(userError||!user){status.textContent='Sign in first in Account Center to sync this workspace.';return}
+   if(mode==='upload'){
+    const payload=collect().data;
+    const {error}=await client.from('oracle_workspace_data').upsert({user_id:user.id,data:payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+    if(error)throw error;
+    status.textContent='Workspace backup synced to your signed-in account. You can restore it on another device.';
+   }else{
+    const {data,error}=await client.from('oracle_workspace_data').select('data,updated_at').eq('user_id',user.id).maybeSingle();
+    if(error)throw error;
+    if(!data?.data?.data) {status.textContent='No cloud backup found for this account yet. Use “Sync local data to account” first.';return}
+    if(!confirm('Restore the cloud backup to this browser? Matching local ORACLE data will be replaced. Download a local backup first if you need it.'))return;
+    const allowed=['oracleChats.v2','oracleMemory.v1','oracleScheduledTasks','oracleImageVault.v1','oracleDisplayName'];
+    for(const key of allowed){const value=data.data.data[key];if(typeof value==='string'){if(key!=='oracleDisplayName')JSON.parse(value);localStorage.setItem(key,value)}}
+    status.textContent='Cloud backup restored. Reloading the workspace…';setTimeout(()=>location.reload(),700);
+   }
+  }catch(error){status.textContent='Cloud sync unavailable: '+(error?.message||'Check Supabase setup and the oracle_workspace_data table.')}
+ }
+ const uploadCloudBtn=button('⇧ Sync local data to account','primary',()=>cloudSync('upload'));
+ const restoreCloudBtn=button('⇩ Restore cloud backup','secondary',()=>cloudSync('restore'));
  const refreshBtn=button('↻ Refresh storage report','secondary',draw);
- actions.append(exportBtn,importBtn,file,persistBtn,refreshBtn,status);
+ actions.append(exportBtn,importBtn,file,persistBtn,uploadCloudBtn,restoreCloudBtn,refreshBtn,status);
  const note=document.createElement('p');note.className='muted';note.style.cssText='font-size:12px;line-height:1.7;margin-top:18px';note.textContent='Privacy note: backups include conversation text, memories, reminders, image links, and your display name. They do not include AI provider keys or Supabase credentials. Treat backup files as private.';
  shell.append(head,intro,grid,rows,actions,note);page.append(shell);document.body.append(page);draw()
 }
