@@ -33,9 +33,9 @@ export async function POST(request: NextRequest) {
   }
 
   if (process.env.ORACLE_REQUIRE_AUTH === "true") {
-    const supabaseUrl = process.env.SUPABASE_URL?.replace(/\\/$/, "");
+    const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
     const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-    const token = request.headers.get("authorization")?.replace(/^Bearer\\s+/i, "");
+    const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
     if (!supabaseUrl || !supabaseAnonKey) {
       return NextResponse.json({ title: null, skipped: true }, { status: 200, headers });
     }
