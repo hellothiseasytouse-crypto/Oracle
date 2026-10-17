@@ -258,7 +258,7 @@ async function send(){
  } catch(err) {
    waiting.querySelector('.bubble').innerHTML=renderMD('**ORACLE can’t reach its AI model yet.**\n\n'+endpointSafeError(err)+'\n\nThe request failed before ORACLE could finish processing it. If you attached a file, check the backend error above and try again after the server update is deployed.');
    conversation.push({role:'assistant',content:'ORACLE connection status: '+endpointSafeError(err)});saveCurrent();
- }finally{oracleSending=false;$('sendBtn').disabled=false;$('sendBtn').removeAttribute('aria-busy');$('sendBtn').classList.remove('sending');messages.scrollIntoView({behavior:'smooth',block:'end'});}
+ }finally{oracleSending=false;$('sendBtn').disabled=false;$('sendBtn').removeAttribute('aria-busy');$('sendBtn').classList.remove('sending');}
 }
 function endpointSafeError(err){return err&&err.message?err.message:'A network error occurred.'}
 function newChat(){saveCurrent();const id=makeId();const chat={id,title:'New conversation',messages:[],updatedAt:Date.now()};chats.unshift(chat);activeChatId=id;conversation=chat.messages;messages.replaceChildren();welcome.classList.remove('hidden');$('modeNotice').classList.remove('hidden');prompt.value='';attached=[];updateAttachments();saveChats();renderHistory();prompt.focus();if(window.innerWidth<=760)closeMenu()}
