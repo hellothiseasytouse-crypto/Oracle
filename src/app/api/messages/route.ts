@@ -151,14 +151,14 @@ export async function POST(request: NextRequest) {
     );
     const lastUserText = [...validMessages].reverse().find(item => item.role === "user")?.content || "";
     const isWebSearchRequest = /\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/i.test(lastUserText);
-    // Vision requests must use a vision model. Groq retired the old groq/compound ID; use compound-beta for web-search requests.
-    // If an image is attached, keep the vision model and let the frontend-provided search results supply web context.
+    // Use currently supported Groq models: Qwen 3.8 for vision, GPT-OSS 120B with browser_search for web requests.
     const isGroq = /groq\.com/i.test(baseUrl);
     const model = isGroq && hasImageAttachments
-      ? "qwen/qwen3.6-27b"
+      ? "qwen/qwen3.8-27b"
       : isGroq && isWebSearchRequest
-        ? "compound-beta"
+        ? "openai/gpt-oss-120b"
         : configuredModel === "llama-3.3-70b-versatile" ? "openai/gpt-oss-120b" : configuredModel;
+    const useBrowserSearch = isGroq && isWebSearchRequest && !hasImageAttachments;
     const upstream = await fetch(baseUrl + "/chat/completions", {
       method: "POST",
       headers: {
@@ -170,6 +170,7 @@ export async function POST(request: NextRequest) {
         messages: providerMessages,
         temperature: 0.7,
         max_tokens: 2048,
+        ...(useBrowserSearch ? { tools: [{ type: "browser_search" }], tool_choice: "required" } : {}),
       }),
       signal: AbortSignal.timeout(60000),
     });
