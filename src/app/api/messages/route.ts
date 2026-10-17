@@ -142,11 +142,11 @@ export async function POST(request: NextRequest) {
     const validMessages = messages.filter((item): item is IncomingMessage =>
       !!item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string"
     ).slice(-80);
-    const recentMessages = validMessages.slice(-10);
-    let budget = 12000;
+    const recentMessages = validMessages.slice(-8);
+    let budget = 7000;
     for (const item of recentMessages) {
       if (budget <= 0) break;
-      const content = item.content.slice(-Math.min(3000, budget));
+      const content = item.content.slice(-Math.min(1800, budget));
       if (!content.trim()) continue;
       providerMessages.push({ role: item.role, content });
       budget -= content.length;
@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
           model,
           messages: providerMessages,
           temperature: 0.4,
-          max_tokens: 1024,
+          max_tokens: 768,
         }),
         signal: AbortSignal.timeout(60000),
       });
@@ -277,6 +277,35 @@ export async function POST(request: NextRequest) {
         }
         const retryMessage = typeof data?.error?.message === "string" ? data.error.message : "The request was too large even after reducing the chat context. Start a new conversation or shorten the latest message.";
         return NextResponse.json({ error: retryMessage }, { status: retry.status === 429 ? 429 : 502, headers });
+      }
+      // If Groq rejects the large model request for TPM/token pressure, make one
+      // compact retry on its smaller GPT-OSS model before surfacing an error. This
+      // preserves the full persona while lowering both input and output token demand.
+      const tokenPressure = upstream.status === 429 &&
+        /tokens per minute|token per minute|tpm|rate.?limit.*token|requested.*token|limit.*token/i.test(message);
+      if (isGroq && tokenPressure) {
+        const compactMessages = [providerMessages[0], ...validMessages.slice(-4).map(item => ({
+          role: item.role,
+          content: item.content.slice(-1200),
+        }))];
+        const compactRetry = await fetch(baseUrl + "/chat/completions", {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + activeApiKey, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "openai/gpt-oss-20b",
+            messages: compactMessages,
+            temperature: 0.4,
+            max_tokens: 640,
+          }),
+          signal: AbortSignal.timeout(45000),
+        });
+        const compactData = await compactRetry.json().catch(() => ({}));
+        if (compactRetry.ok) {
+          const compactReply = compactData?.choices?.[0]?.message?.content;
+          if (typeof compactReply === "string" && compactReply.trim()) {
+            return NextResponse.json({ reply: compactReply, fallbackModel: "openai/gpt-oss-20b" }, { headers });
+          }
+        }
       }
       const exhaustedMessage = [401, 402, 403, 429].includes(upstream.status)
         ? `All ${attemptedKeys} configured API key attempt(s) were exhausted or rejected. Last provider response: ${message}`
