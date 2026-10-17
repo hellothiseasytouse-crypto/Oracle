@@ -102,14 +102,39 @@ function addMessage(role,text,meta=''){
  row.append(av,body);messages.appendChild(row);return row;
 }
 function refreshHistory(title){const b=document.createElement('button');b.className='history-item active';b.textContent=title.slice(0,42);b.title=title;$('history').replaceChildren(b)}
-function send(){
+async function send(){
  const text=prompt.value.trim();if(!text&&!attached.length)return;
+ const filesNow=[...attached];
+ const imagePreviews=filesNow.filter(f=>f.type.startsWith('image/')).map(f=>URL.createObjectURL(f));
+ window.__lastAttachedImages=imagePreviews;
+ const shown=text+(filesNow.length?'\\n\\nAttached: '+filesNow.map(f=>f.name).join(', '):'');
  welcome.classList.add('hidden');$('modeNotice').classList.remove('hidden');
- const shown=text+(attached.length?'\n\nAttached: '+attached.map(f=>f.name).join(', '):'');
  addMessage('user',shown);conversation.push({role:'user',content:shown});
- refreshHistory(text||attached[0]?.name||'Attachment');prompt.value='';prompt.style.height='';attached=[];updateAttachments();
- addMessage('assistant','**ORACLE is not connected to an AI model yet.**\n\nYour interface is working, but this preview cannot generate a real AI answer. To enable live responses, connect a backend/API endpoint and host it separately from GitHub Pages. Keep any API keys on that server—never place secret keys in this page.','Preview mode');
- conversation.push({role:'assistant',content:'ORACLE is not connected to an AI model yet.'});
+ refreshHistory(text||filesNow[0]?.name||'Attachment');
+ prompt.value='';prompt.style.height='';attached=[];updateAttachments();
+ const waiting=addMessage('assistant','Thinking…','');
+ try {
+   const endpoint=window.ORACLE_API_URL || '';
+   if(!endpoint) throw new Error('No AI backend is configured yet. The website needs a separately hosted backend before it can generate real AI replies.');
+   const attachments=await Promise.all(filesNow.map(async f=>{
+     if(f.size>12*1024*1024) throw new Error(f.name+' is larger than the 12 MB preview limit.');
+     const item={name:f.name,type:f.type,size:f.size};
+     if(f.type.startsWith('image/')||f.type==='text/plain'||f.type==='text/markdown'||f.type==='application/json'||f.type==='text/csv'){
+       item.data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('Could not read '+f.name));reader.readAsDataURL(f)});
+     }
+     return item;
+   }));
+   const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:conversation,attachments})});
+   if(!response.ok) throw new Error('AI server returned HTTP '+response.status+'. Check the backend deployment and API key.');
+   const data=await response.json();const answer=data.reply||data.message||data.output_text||data.choices?.[0]?.message?.content;
+   if(!answer) throw new Error('The server responded, but no answer text was returned.');
+   waiting.querySelector('.bubble').innerHTML=renderMD(answer);
+   conversation.push({role:'assistant',content:answer});
+   if(readAloud&&'speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(answer.replace(/[#*\x60>]/g,'')))}
+ } catch(err) {
+   waiting.querySelector('.bubble').innerHTML=renderMD('**ORACLE can’t reach its AI model yet.**\\n\\n'+endpointSafeError(err)+'\\n\\nYour attachments are previewed locally; they are only sent to an AI service if you configure a backend endpoint.');
+   conversation.push({role:'assistant',content:'ORACLE connection status: '+endpointSafeError(err)});
+ }
  messages.scrollIntoView({behavior:'smooth',block:'end'});
 }
 function endpointSafeError(err){return err&&err.message?err.message:'A network error occurred.'}\nfunction newChat(){messages.replaceChildren();conversation=[];welcome.classList.remove('hidden');prompt.value='';attached=[];updateAttachments();refreshHistory('New conversation');prompt.focus();if(window.innerWidth<=760)closeMenu()}
