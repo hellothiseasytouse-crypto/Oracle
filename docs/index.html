@@ -282,68 +282,65 @@ function addActivityIndicator(container,label){const row=document.createElement(
 async function maybeShowImages(query,bubble){
  const original=String(query||'').trim();if(!original)return;
  const explicitImage=/\b(image|images|picture|pictures|photo|photos|wallpaper|artwork|illustration|show me|show|find images|find pictures|look for images|visuals?|what does .+ look like|show .+ to me|ai art|ai-generated|generated art)\b/i.test(original);
- const visualTopic=/\b(mario|flowers?|popp(y|ies)|animals?|birds?|fish|cats?|dogs?|pets?|planets?|galax(y|ies)|constellations?|mushrooms?|trees?|plants?|insects?|dinosaurs?|landmarks?|architecture|outfits?|hairstyles?|flags?|cars?|vehicles?|characters?|logos?|paintings?|art styles?|neurons?|nerves?|brain|heart|lungs?|cells?|bacteria|viruses?|microscopes?|space|nebulae?|black holes?|volcanoes?|mountains?|oceans?|maps?|fossils?|minerals?|crystals?|robots?|computers?|keyboards?|cameras?|food|recipes?|buildings?|bridges?|ships?|aircraft|trains?|historical figures|mammals?|reptiles?|amphibians?|spiders?|butterflies|weather|clouds?|storms?|lightning|hurricanes?|skeletons?|muscles?|organs?|anatomy|geology|chemistry|physics|math|mathematics|art|fashion|interiors?|furniture|gardens?|forests?|deserts?|waterfalls?|rivers?|lakes?|planets?|moons?|stars?|galaxies|technology|gadgets?|instruments?|sports?|football|soccer|basketball|cricket|games?|video games?)\b/i.test(original);
+ const visualTopic=/\b(mario|flowers?|popp(y|ies)|animals?|birds?|fish|cats?|dogs?|pets?|planets?|galax(y|ies)|constellations?|mushrooms?|trees?|plants?|insects?|dinosaurs?|landmarks?|architecture|outfits?|hairstyles?|flags?|cars?|vehicles?|characters?|logos?|paintings?|art styles?|neurons?|nerves?|brain|heart|lungs?|cells?|bacteria|viruses?|microscopes?|space|nebulae?|black holes?|volcanoes?|mountains?|oceans?|maps?|fossils?|minerals?|crystals?|robots?|computers?|keyboards?|cameras?|food|buildings?|bridges?|ships?|aircraft|trains?|historical figures|mammals?|reptiles?|amphibians?|spiders?|butterflies|weather|clouds?|storms?|lightning|hurricanes?|skeletons?|muscles?|organs?|anatomy|geology|chemistry|physics|math|mathematics|art|fashion|interiors?|furniture|gardens?|forests?|deserts?|waterfalls?|rivers?|lakes?|stars?|technology|gadgets?|instruments?|sports?|football|soccer|basketball|cricket|games?|video games?)\b/i.test(original);
  if(!explicitImage&&!visualTopic)return;
  const aliases=[
-  [/\bmario\b/i,'Mario Nintendo character'],
-  [/\bpopp(y|ies)\b/i,'poppy flower Papaver'],
-  [/\bneurons?\b/i,'neuron nerve cell microscopy'],
-  [/\bbrain\b/i,'human brain anatomy'],
-  [/\bspace\b/i,'outer space astronomy'],
-  [/\bai[- ]?generated art\b|\bai art\b/i,'digital art illustration'],
-  [/\bflowers?\b/i,'flower botanical photography'],
-  [/\bcat(s)?\b/i,'domestic cat animal'],
-  [/\bdog(s)?\b/i,'domestic dog animal'],
-  [/\bheart\b/i,'human heart anatomy'],
-  [/\bcell(s)?\b/i,'cell biology microscopy'],
-  [/\bblack holes?\b/i,'black hole astronomy illustration'],
-  [/\bplanets?\b/i,'planet astronomy'],
-  [/\bgalax(y|ies)\b/i,'galaxy astronomy'],
-  [/\bdinosaur(s)?\b/i,'dinosaur fossil reconstruction'],
-  [/\bbutterflies\b/i,'butterfly insect'],
-  [/\bvolcano(es)?\b/i,'volcano geology'],
-  [/\bcrystals?\b/i,'mineral crystal specimen'],
-  [/\barchitecture\b/i,'architecture buildings'],
-  [/\bhairstyles?\b/i,'hairstyle reference'],
-  [/\boutfits?\b/i,'fashion outfit reference'],
-  [/\bflags?\b/i,'national flags']
+  [/\bmario\b/i,'Mario Nintendo character'],[/\bpopp(y|ies)\b/i,'poppy flower Papaver'],[/\bneurons?\b/i,'neuron nerve cell microscopy'],[/\bbrain\b/i,'human brain anatomy'],[/\bspace\b/i,'outer space astronomy'],[/\bflowers?\b/i,'flower botanical photography'],[/\bcat(s)?\b/i,'domestic cat animal'],[/\bdog(s)?\b/i,'domestic dog animal'],[/\bheart\b/i,'human heart anatomy'],[/\bcell(s)?\b/i,'cell biology microscopy'],[/\bblack holes?\b/i,'black hole astronomy illustration'],[/\bplanets?\b/i,'planet astronomy'],[/\bgalax(y|ies)\b/i,'galaxy astronomy'],[/\bdinosaur(s)?\b/i,'dinosaur fossil reconstruction'],[/\bbutterflies\b/i,'butterfly insect'],[/\bvolcano(es)?\b/i,'volcano geology'],[/\bcrystals?\b/i,'mineral crystal specimen'],[/\barchitecture\b/i,'architecture buildings'],[/\bhairstyles?\b/i,'hairstyle reference'],[/\boutfits?\b/i,'fashion outfit reference'],[/\bflags?\b/i,'national flags']
  ];
  let term=original.replace(/\b(show me|show|find|search for|search|images? of|pictures? of|photos? of|picture of|pic of|image of|photo of|from (the )?web|please|can you|could you|give me|a pic|a picture|display|look up|on the internet|from the internet|ai-generated|ai generated|ai art|what does|what do|look like|to me)\b/ig,' ').replace(/[?!.,]/g,' ').replace(/\s+/g,' ').trim();
  for(const [pattern,expanded] of aliases){if(pattern.test(original)){term=expanded+' '+term.replace(pattern,'').trim();break}}
  term=term.replace(/\s+/g,' ').trim()||original;
- const heading=document.createElement('p');heading.className='image-results-label';heading.textContent='Images from the web';bubble.appendChild(heading);
+ const heading=document.createElement('p');heading.className='image-results-label';heading.textContent='Searching multiple image collections';bubble.appendChild(heading);
  const grid=document.createElement('div');grid.className='image-results';bubble.appendChild(grid);
- const loading=addActivityIndicator(grid,'Searching image collections');
+ const loading=addActivityIndicator(grid,'Searching image indexes');
  const storageKey='oracleSeenImageResults.v1';
  let seen=[];try{seen=JSON.parse(localStorage.getItem(storageKey)||'[]');if(!Array.isArray(seen))seen=[]}catch{seen=[]}
- const remember=id=>{seen=[...seen.filter(x=>x!==id),id].slice(-300);try{localStorage.setItem(storageKey,JSON.stringify(seen))}catch{}};
+ const clean=v=>String(v||'').replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&#0*39;/g,"'").replace(/\s+/g,' ').trim();
+ const sources=[];
+ const openverseSearch=async q=>{
+  const url='https://api.openverse.org/v1/images/?q='+encodeURIComponent(q)+'&page_size=30&page=1';
+  const res=await fetch(url,{headers:{Accept:'application/json'}});
+  if(!res.ok)throw new Error('Openverse HTTP '+res.status);
+  const data=await res.json();
+  return (data.results||[]).map(p=>({id:'ov:'+String(p.id||p.foreign_landing_url||p.url),title:p.title||p.creator||'Untitled image',source:p.thumbnail||p.url,link:p.foreign_landing_url||p.url,extract:p.creator?'Creator: '+p.creator:'Open the source for details',license:p.license?String(p.license).toUpperCase():'License details on source page',provider:'Openverse'})).filter(p=>p.source&&/^https?:\/\//i.test(p.source));
+ };
+ const commonsSearch=async q=>{
+  const url='https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(q)+'&gsrnamespace=6&gsrlimit=30&prop=imageinfo&iiprop=url%7Cextmetadata%7CMimeType&iiurlwidth=640&format=json&origin=*';
+  const res=await fetch(url);if(!res.ok)throw new Error('Wikimedia HTTP '+res.status);
+  const data=await res.json();
+  return Object.values(data.query?.pages||{}).filter(p=>p.title&&p.imageinfo?.[0]?.thumburl&&/^image\//i.test(p.imageinfo[0].mime||'image/')).map(p=>{
+   const info=p.imageinfo[0],meta=info.extmetadata||{};
+   return {id:'commons:'+String(p.pageid||p.title),title:p.title.replace(/^File:/,''),source:info.thumburl,link:info.descriptionurl||('https://commons.wikimedia.org/wiki/'+encodeURIComponent(p.title.replace(/ /g,'_'))),extract:clean(meta.ImageDescription?.value)||clean(meta.Artist?.value)||'Open the source for image details',license:clean(meta.LicenseShortName?.value)||'License details on source page',provider:'Wikimedia Commons'};
+  });
+ };
  try{
-  const searchTerms=[term,term+' photograph',term+' illustration'].filter((v,i,a)=>a.indexOf(v)===i).slice(0,2);
-  const batches=await Promise.all(searchTerms.map(async searchTerm=>{
-   const url='https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(searchTerm)+'&gsrnamespace=6&gsrlimit=30&gsrinfo=totalhits&prop=imageinfo&iiprop=url%7Cextmetadata%7CMimeType&iiurlwidth=640&format=json&origin=*';
-   const res=await fetch(url);if(!res.ok)throw new Error('image search unavailable');const data=await res.json();
-   return Object.values(data.query?.pages||{}).filter(p=>p.title&&p.imageinfo?.[0]?.thumburl&&/^image\//i.test(p.imageinfo[0].mime||'image/')).map(p=>{
-    const info=p.imageinfo[0],meta=info.extmetadata||{};
-    const clean=v=>String(v?.value||'').replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&#0*39;/g,"'").replace(/\s+/g,' ').trim();
-    return {id:String(p.pageid||p.title),title:p.title.replace(/^File:/,''),source:info.thumburl,link:info.descriptionurl||('https://commons.wikimedia.org/wiki/'+encodeURIComponent(p.title.replace(/ /g,'_'))),extract:clean(meta.ImageDescription)||clean(meta.Artist)||'Open the source for image details',license:clean(meta.LicenseShortName)||'License details on source page'};
-   });
-  }));
-  const unique=new Map();for(const p of batches.flat())if(!unique.has(p.id))unique.set(p.id,p);
-  let all=[...unique.values()];
-  // Shuffle matching candidates, prioritize unseen images, and avoid repeating recent results across chats.
-  all.sort(()=>Math.random()-.5);
+  const related=[term,term+' illustration'].filter((v,i,a)=>a.indexOf(v)===i).slice(0,2);
+  const settled=await Promise.allSettled([
+   ...related.map(openverseSearch),
+   commonsSearch(term)
+  ]);
+  let all=[];let errors=0;
+  for(const result of settled){if(result.status==='fulfilled')all.push(...result.value);else errors++}
+  const unique=new Map();for(const p of all)if(!unique.has(p.id))unique.set(p.id,p);
+  all=[...unique.values()].sort(()=>Math.random()-.5);
   let fresh=all.filter(p=>!seen.includes(p.id));
   if(fresh.length<4){seen=seen.slice(-80);fresh=all.filter(p=>!seen.includes(p.id))}
-  const pages=fresh.slice(0,8);
+  const pages=fresh.slice(0,12);
   loading.remove();
-  if(!pages.length){heading.textContent='No new matching images found';const note=document.createElement('small');note.className='image-search-note';note.textContent='Try a more specific keyword. ORACLE remembers recently shown results in this browser to reduce repeats.';grid.append(note);return}
+  if(!pages.length){
+   heading.textContent=errors===settled.length?'Image search services could not be reached':'No new matching images found';
+   const note=document.createElement('small');note.className='image-search-note';note.textContent='ORACLE searches Openverse and Wikimedia Commons when available. Some services may require access or may be temporarily unavailable. Try more specific keywords.';grid.append(note);return
+  }
+  heading.textContent='Image results from multiple collections';
   for(const p of pages){
-   remember(p.id);
+   seen=[...seen.filter(x=>x!==p.id),p.id];
    const card=document.createElement('a');card.className='image-result';card.href=p.link;card.target='_blank';card.rel='noopener noreferrer';
    const img=document.createElement('img');img.loading='lazy';img.src=p.source;img.alt=p.title;img.referrerPolicy='no-referrer';img.onerror=()=>{card.remove();if(!grid.querySelector('.image-result')){const note=document.createElement('small');note.className='image-search-note';note.textContent='Some source images could not load. Open another result or try different keywords.';grid.append(note)}};
-   const copy=document.createElement('span');copy.className='image-result-copy';const title=document.createElement('strong');title.textContent=p.title;const desc=document.createElement('small');desc.textContent=p.extract.slice(0,125);const source=document.createElement('small');source.className='image-result-source';source.textContent=p.license+' · Wikimedia Commons';copy.append(title,desc,source);card.append(img,copy);grid.append(card)
+   const copy=document.createElement('span');copy.className='image-result-copy';const title=document.createElement('strong');title.textContent=p.title;const desc=document.createElement('small');desc.textContent=p.extract.slice(0,125);const source=document.createElement('small');source.className='image-result-source';source.textContent=p.license+' · '+p.provider;copy.append(title,desc,source);card.append(img,copy);grid.append(card)
   }
- }catch{loading.remove();grid.remove();heading.textContent='Could not load images right now';const note=document.createElement('small');note.className='image-search-note';note.textContent='The public image collection did not respond. Try again later or use more specific keywords.';bubble.appendChild(note)}
+  try{localStorage.setItem(storageKey,JSON.stringify(seen.slice(-300)))}catch{}
+  const note=document.createElement('small');note.className='image-search-note';note.textContent='Sources searched: Openverse (an aggregator of openly licensed media) and Wikimedia Commons. Results and image loading depend on each provider.';bubble.append(note);
+ }catch{loading.remove();grid.remove();heading.textContent='Could not load image results';const note=document.createElement('small');note.className='image-search-note';note.textContent='The image providers did not respond. Try again later or use more specific keywords.';bubble.appendChild(note)}
 }
 async function getWebSearchResults(query){
  const q=String(query||'').replace(/\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/ig,' ').trim();
