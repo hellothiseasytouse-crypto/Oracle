@@ -58,18 +58,16 @@ body.sidebar-collapsed .app{grid-template-columns:0 minmax(0,1fr)}body.sidebar-c
 @keyframes oracle-mark-settle{0%,88%,100%{transform:rotate(0deg) scale(1)}92%{transform:rotate(-4deg) scale(1.04)}96%{transform:rotate(3deg) scale(1.02)}}
 #newChat svg path:last-child{transform-origin:5px 19px;transition:transform .28s ease}
 #newChat:hover svg path:last-child{transform:rotate(-9deg) translate(-1px,-1px)}
-#scheduleBtn svg circle{transform-box:fill-box;transform-origin:center}#scheduleBtn svg path:nth-of-type(1){transform-box:fill-box;transform-origin:12px 12px}
-#scheduleBtn:hover svg circle{animation:clock-face-turn .8s ease-in-out}
-#scheduleBtn:hover svg path:nth-of-type(1){animation:clock-hand-tick .8s ease-in-out}
-@keyframes clock-face-turn{to{transform:rotate(0deg);filter:drop-shadow(0 0 3px #c4b5fd)}}
-@keyframes clock-hand-tick{0%,100%{transform:rotate(0)}45%{transform:rotate(22deg)}}
+#scheduleBtn svg circle{animation:none!important;transform:none!important}#scheduleBtn svg path:nth-of-type(1){transform-box:view-box;transform-origin:12px 12px}
+#scheduleBtn:hover svg path:nth-of-type(1){animation:clock-hand-orbit 1.15s linear 1}
+@keyframes clock-hand-orbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 #memoryBtn svg{transition:filter .25s ease,transform .25s ease}
 #memoryBtn:hover svg{filter:drop-shadow(0 0 2px #c4b5fd55);transform:translateY(-1px)}
 #aboutBtn{gap:10px}
 #aboutBtn .about-mark{width:17px;height:17px;display:inline-grid;place-items:center;flex:0 0 17px}
 #aboutBtn .about-mark svg{width:17px;height:17px;display:block}
 .nav-action svg,#aboutBtn .about-mark svg{overflow:visible}
-@media(prefers-reduced-motion:reduce){.logo svg{animation:none}#scheduleBtn:hover svg circle,#scheduleBtn:hover svg path{animation:none}#newChat svg path:last-child{transition:none}}
+@media(prefers-reduced-motion:reduce){.logo svg{animation:none}#scheduleBtn:hover svg circle{animation:none!important}#scheduleBtn:hover svg path:nth-of-type(1){animation:none}#newChat svg path:last-child{transition:none}}
 
 </style>
 <link rel="icon" type="image/svg+xml" href="/Oracle/favicon.svg?v=20261017c">
@@ -171,7 +169,7 @@ function openConversationDialog(title,description,initialValue,confirmLabel,onCo
 function openChat(id){saveCurrent();const target=chats.find(x=>x.id===id);if(!target)return;activeChatId=id;localStorage.setItem('oracleActiveChatId',id);conversation=target.messages||[];messages.replaceChildren();for(const item of conversation){const row=addMessage(item.role,item.content);if(item.role==='assistant')addCodeDownloads(row.querySelector('.bubble'))}welcome.classList.toggle('hidden',conversation.length>0);$('modeNotice').classList.toggle('hidden',conversation.length>0);saveChats();renderHistory();if(window.innerWidth<=760)closeMenu()}
 function loadMemory(){try{const m=JSON.parse(localStorage.getItem(MEMORY_KEY)||'[]');return Array.isArray(m)?m:[]}catch{return []}}
 function saveMemory(items){localStorage.setItem(MEMORY_KEY,JSON.stringify(items.slice(-100)))}
-function extractMemory(text){const input=String(text||'').trim();let fact='';const explicit=input.match(/^(?:please\s+)?remember(?:\s+that|\s+this|\s+the following)?\s*[:,—-]?\s*(.{3,300})$/i);if(explicit)fact=explicit[1].trim();else{const pref=input.match(/^(?:i|we)\s+(?:really\s+)?(like|love|prefer|enjoy|hate|dislike)\s+(.{2,180})[.!]?$/i);const favorite=input.match(/^(?:my|our)\s+favorite\s+([a-z][a-z -]{1,35})\s+(?:is|are)\s+(.{2,140})[.!]?$/i);if(pref)fact='User '+({like:'likes',love:'loves',prefer:'prefers',enjoy:'enjoys',hate:'dislikes',dislike:'dislikes'}[pref[1].toLowerCase()])+' '+pref[2].replace(/[.!?]+$/,'').trim()+'.';else if(favorite)fact='User’s favorite '+favorite[1].trim()+' is '+favorite[2].replace(/[.!?]+$/,'').trim()+'.'}if(!fact)return false;const items=loadMemory();if(!items.some(x=>x.toLowerCase()===fact.toLowerCase())){items.push(fact);saveMemory(items.slice(-100))}return fact}
+function extractMemory(text){const input=String(text||'').trim();if(!input)return false;let fact='';const explicit=input.match(/^(?:hey\s+oracle[,! ]*)?(?:please\s+)?remember(?:\s+(?:that|this|the following|for next time|for later))?\s*[:,—-]?\s*(.{2,300})$/i);if(explicit){fact=explicit[1].trim().replace(/^(?:that\s+)?/i,'').replace(/[.!?]+$/,'').trim()}else{const pref=input.match(/^(?:i|we)\s+(?:really\s+)?(like|love|prefer|enjoy|hate|dislike)\s+(.{2,180})[.!]?$/i);const favorite=input.match(/^(?:my|our)\s+favorite\s+([a-z][a-z -]{1,35})\s+(?:is|are)\s+(.{2,140})[.!]?$/i);if(pref)fact='User '+({like:'likes',love:'loves',prefer:'prefers',enjoy:'enjoys',hate:'dislikes',dislike:'dislikes'}[pref[1].toLowerCase()])+' '+pref[2].replace(/[.!?]+$/,'').trim()+'.';else if(favorite)fact='User’s favorite '+favorite[1].trim()+' is '+favorite[2].replace(/[.!?]+$/,'').trim()+'.'}if(!fact||fact.length<2)return false;const items=loadMemory();if(!items.some(x=>x.toLowerCase()===fact.toLowerCase())){items.push(fact);saveMemory(items.slice(-100))}return fact}
 function memoryContext(){const items=loadMemory();return items.length?items.map((x,i)=>(i+1)+'. '+x).join('\n'):''}
 
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.add('hidden'),2800)}
@@ -219,7 +217,7 @@ async function send(){
  window.__lastAttachedImages=imagePreviews;
  const nonImageFiles=filesNow.filter(f=>!f.type.startsWith('image/'));
  const shown=text+(nonImageFiles.length?'\n\nAttached: '+nonImageFiles.map(f=>f.name).join(', '):'');
- const savedFact=extractMemory(text.trim());
+ const savedFact=extractMemory(text.trim());if(savedFact){try{const verify=loadMemory();if(!verify.some(x=>x.toLowerCase()===savedFact.toLowerCase())){verify.push(savedFact);saveMemory(verify)}}catch(e){console.warn('Could not save ORACLE memory locally',e)}}
  welcome.classList.add('hidden');$('modeNotice').classList.remove('hidden');
  const userRow=addMessage('user',shown);const userBubble=userRow.querySelector('.bubble');
  imagePreviews.forEach((src,i)=>{const img=document.createElement('img');img.className='inline-image user-attachment-image';img.src=src;img.alt=filesNow.filter(f=>f.type.startsWith('image/'))[i]?.name||'Attached image';img.loading='lazy';userBubble.appendChild(img)});
@@ -227,7 +225,7 @@ async function send(){
  const activeForTitle=currentChat();if(activeForTitle&&!activeForTitle.customTitle){const titleSource=text||filesNow[0]?.name||'Attachment';const existingAuto=String(activeForTitle.autoTitleSource||'');const previousWasFiller=/^(hey|hello|hi|yo|sup|thanks|thank you|ok|okay|cool|nice|lol|lmao|yes|no|yep|nope)\b/i.test(existingAuto.trim());if(!activeForTitle.autoTitleSource||previousWasFiller||activeForTitle.title==='New conversation'){activeForTitle.title=makeChatTitle(titleSource);activeForTitle.autoTitleSource=titleSource;}activeForTitle.updatedAt=Date.now();saveChats();renderHistory();}
  refreshHistory(text||filesNow[0]?.name||'Attachment');
  prompt.value='';prompt.style.height='';attached=[];updateAttachments();
- const waiting=addMessage('assistant','','');const activityBubble=waiting.querySelector('.bubble');if(savedFact){const memoryActivity=addActivityIndicator(activityBubble,'Storing memory');memoryActivity.classList.add('oracle-activity-memory');const statusText=memoryActivity.querySelector('span');setTimeout(()=>{if(!memoryActivity.isConnected)return;statusText.textContent='Memory stored · Completed';memoryActivity.classList.add('is-complete');memoryActivity.querySelector('.oracle-dots')?.remove();},650);}const initialActivityLabel=filesNow.length?'Analyzing attachments':(/\b(analy[sz]e|review|inspect|examine|summari[sz]e|compare|debug|check this|what is in this image)\b/i.test(text)?'Analyzing request':(/\b(create|write|build|generate|design|code|draft)\b/i.test(text)?'Preparing a response':'Thinking'));addActivityIndicator(activityBubble,initialActivityLabel);
+ const waiting=addMessage('assistant','','');const activityBubble=waiting.querySelector('.bubble');if(savedFact){const memoryActivity=addActivityIndicator(activityBubble,'Storing memory');memoryActivity.classList.add('oracle-activity-memory');memoryActivity.dataset.memoryFact=savedFact;}const initialActivityLabel=filesNow.length?'Analyzing attachments':(/\b(analy[sz]e|review|inspect|examine|summari[sz]e|compare|debug|check this|what is in this image)\b/i.test(text)?'Analyzing request':(/\b(create|write|build|generate|design|code|draft)\b/i.test(text)?'Preparing a response':'Thinking'));addActivityIndicator(activityBubble,initialActivityLabel);
  try {
    const endpoint=window.ORACLE_API_URL || localStorage.getItem('oracleApiUrl') || (location.hostname.endsWith('github.io') ? '' : '/api/messages');
    if(!endpoint) throw new Error('No AI backend is configured yet. The website needs a separately hosted backend before it can generate real AI replies.');
@@ -249,7 +247,7 @@ async function send(){
    if(!response.ok) throw new Error(data.error || ('AI server returned HTTP '+response.status+'. Check the backend deployment and API key.'));
    const answer=data.reply||data.message||data.output_text||data.choices?.[0]?.message?.content;
    if(!answer) throw new Error('The server responded, but no answer text was returned.');
-   waiting.querySelector('.bubble').innerHTML=renderMD(answer);addCodeDownloads(waiting.querySelector('.bubble'),text);addChoiceButtons(answer,waiting.querySelector('.bubble'));
+   waiting.querySelector('.bubble').innerHTML=renderMD(answer);const finalBubble=waiting.querySelector('.bubble');if(savedFact){const memoryActivity=addActivityIndicator(finalBubble,'Storing memory');memoryActivity.classList.add('oracle-activity-memory');const statusText=memoryActivity.querySelector('span');setTimeout(()=>{if(!memoryActivity.isConnected)return;statusText.textContent='Memory stored · Completed';memoryActivity.classList.add('is-complete');memoryActivity.querySelector('.oracle-dots')?.remove();},900);}addCodeDownloads(finalBubble,text);addChoiceButtons(answer,finalBubble);
    conversation.push({role:'assistant',content:answer});
    await maybeShowImages(text,waiting.querySelector('.bubble'));
    await maybeSearchWeb(text,waiting.querySelector('.bubble'),webPages);
