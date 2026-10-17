@@ -121,7 +121,7 @@ function loadChats(){try{const saved=JSON.parse(localStorage.getItem(CHAT_KEY)||
 function makeId(){return 'chat_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8)}
 function saveChats(){try{localStorage.setItem(CHAT_KEY,JSON.stringify(chats.slice(0,100)));if(activeChatId)localStorage.setItem('oracleActiveChatId',activeChatId)}catch{toast('Storage is full. Export a conversation before continuing.')}}
 function currentChat(){return chats.find(x=>x.id===activeChatId)}
-function makeChatTitle(text){let s=String(text||'').replace(/^remember that\s+/i,'').replace(/\s+/g,' ').trim();s=s.replace(/^(hey|hello|hi|please)\s*[,!:. -]*/i,'');if(!s)return 'New conversation';return s.length>38?s.slice(0,37).trimEnd()+'…':s}
+function makeChatTitle(text){let s=String(text||'').replace(/^remember that\s+/i,'').replace(/\s+/g,' ').trim();s=s.replace(/^(hey|hello|hi|please)\s*[,!:. -]*/i,'').replace(/[?!.,;:]+$/,'').trim();if(!s)return 'New conversation';s=s.charAt(0).toUpperCase()+s.slice(1);return s.length>34?s.slice(0,33).trimEnd()+'…':s}
 function saveCurrent(){const chat=currentChat();if(chat){chat.messages=conversation;chat.updatedAt=Date.now();const first=conversation.find(m=>m.role==='user');if(first&&(!chat.title||chat.title==='New conversation'))chat.title=makeChatTitle(first.content);saveChats();renderHistory()}}
 function renderHistory(){const box=$('history'),pinnedBox=document.querySelector('.pinned-section');if(!box)return;box.replaceChildren();const sorted=[...chats].sort((a,b)=>(Number(!!b.pinned)-Number(!!a.pinned))||(b.updatedAt||0)-(a.updatedAt||0));const pinned=sorted.filter(x=>x.pinned);if(pinnedBox){const list=pinnedBox.querySelector('.pinned-list');if(list)list.remove();const empty=pinnedBox.querySelector('.sidebar-empty');if(empty)empty.style.display=pinned.length?'none':'';const pinList=document.createElement('div');pinList.className='pinned-list';for(const chat of pinned)pinList.appendChild(createChatRow(chat,true));pinnedBox.appendChild(pinList)}for(const chat of sorted.filter(x=>!x.pinned))box.appendChild(createChatRow(chat,false));filterHistory()}
 function createChatRow(chat,isPinned){const row=document.createElement('div');row.className='chat-row'+(chat.id===activeChatId?' active':'');const open=document.createElement('button');open.type='button';open.className='history-item'+(chat.id===activeChatId?' active':'');open.textContent=(isPinned?'◆ ':'')+(chat.title||'New conversation');open.title=chat.title||'New conversation';open.addEventListener('click',()=>openChat(chat.id));row.appendChild(open);const more=document.createElement('button');more.type='button';more.className='chat-more';more.textContent='···';more.title='Conversation options';more.setAttribute('aria-label','Options for '+(chat.title||'conversation'));more.addEventListener('click',e=>{e.stopPropagation();showChatMenu(chat,more)});row.appendChild(more);return row}
@@ -317,6 +317,22 @@ $('resetAccount').addEventListener('click',()=>{if(!confirm('Clear saved backend
 })();
 </script>
 <style>
+
+/* Conversation controls: visible, accessible and usable on desktop and mobile */
+.chat-row{position:relative;display:flex;align-items:center;gap:4px;width:100%;min-width:0;padding:3px 5px 3px 8px;border-radius:10px;margin:2px 0}
+.chat-row:hover,.chat-row:focus-within{background:var(--surface,rgba(255,255,255,.055))}
+.chat-row.active{background:rgba(255,255,255,.07)}
+.chat-row .history-item{flex:1;min-width:0;width:100%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:transparent;border:0;border-radius:7px;padding:9px 5px;color:var(--text,#eee);font:inherit;cursor:pointer}
+.chat-row .history-item:hover{background:transparent}
+.chat-row .chat-more{display:flex;align-items:center;justify-content:center;flex:0 0 32px;width:32px;height:32px;padding:0;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted,#9b9bb0);font-size:20px;line-height:1;letter-spacing:1px;opacity:0;cursor:pointer}
+.chat-row:hover .chat-more,.chat-row:focus-within .chat-more,.chat-row.active .chat-more{opacity:1}
+.chat-row .chat-more:hover,.chat-row .chat-more:focus-visible{opacity:1;background:rgba(170,150,255,.16);border-color:rgba(170,150,255,.25);color:var(--text,#fff)}
+.chat-menu{position:absolute;z-index:100;right:4px;top:calc(100% - 2px);min-width:176px;padding:5px;background:#171720;border:1px solid #383647;border-radius:11px;box-shadow:0 12px 35px #0009;display:flex;flex-direction:column;gap:2px}
+.chat-menu button{display:block;width:100%;text-align:left;padding:9px 11px;border:0;border-radius:7px;background:transparent;color:#e8e7f2;font:inherit;font-size:13px;cursor:pointer}
+.chat-menu button:hover,.chat-menu button:focus-visible{background:#292536;color:#fff}
+@media(hover:none){.chat-row .chat-more{opacity:1}}
+@media(prefers-reduced-motion:no-preference){.chat-row .chat-more{transition:opacity .15s ease,background .15s ease,color .15s ease}}
+
 /* Responsive ORACLE refinements */
 :root{--bg:#080a10;--panel:#0c0e16;--panel2:#151724;--line:#252737;--accent:#a99ae9;--accent2:#8571d0;--text:#e5e7f2;--muted:#9a9eb4;--user:#171827}
 html,body{background:#080a10;color:var(--text);font-family:Inter,"Avenir Next",Avenir,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
