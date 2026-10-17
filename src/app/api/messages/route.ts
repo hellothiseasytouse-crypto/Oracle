@@ -9,9 +9,9 @@ const allowedOrigins = new Set([
   "http://localhost:3001",
 ]);
 
-function corsHeaders(origin: string | null) {
+function corsHeaders(origin: string | null, requestOrigin: string) {
   const headers = new Headers();
-  if (origin && (allowedOrigins.has(origin) || origin === request.nextUrl.origin)) {
+  if (origin && (allowedOrigins.has(origin) || origin === requestOrigin)) {
     headers.set("Access-Control-Allow-Origin", origin);
     headers.set("Vary", "Origin");
   }
@@ -22,7 +22,7 @@ function corsHeaders(origin: string | null) {
 }
 
 export async function OPTIONS(request: NextRequest) {
-  return new NextResponse(null, { status: 204, headers: corsHeaders(request.headers.get("origin")) });
+  return new NextResponse(null, { status: 204, headers: corsHeaders(request.headers.get("origin"), request.nextUrl.origin) });
 }
 
 type IncomingMessage = { role: "user" | "assistant"; content: string };
@@ -30,7 +30,7 @@ type IncomingAttachment = { name: string; type?: string; size?: number; data?: s
 
 export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
-  const headers = corsHeaders(origin);
+  const headers = corsHeaders(origin, request.nextUrl.origin);
 
   if (origin && !allowedOrigins.has(origin) && origin !== request.nextUrl.origin) {
     return NextResponse.json({ error: "This website is not allowed to use the ORACLE API." }, { status: 403, headers });
