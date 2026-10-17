@@ -143,7 +143,12 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = (process.env.ORACLE_API_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
     const configuredModel = process.env.ORACLE_MODEL || "openai/gpt-oss-120b";
-    const hasImageAttachments = attachments.some(file => !!file && typeof file.type === "string" && file.type.startsWith("image/") && typeof file.data === "string" && file.data.startsWith("data:image/"));
+    const hasImageAttachments = providerMessages.some(message =>
+      Array.isArray(message.content) && message.content.some((part: any) => part?.type === "image_url")
+    ) || attachments.some(file =>
+      !!file && typeof file.type === "string" && file.type.startsWith("image/") &&
+      typeof file.data === "string" && file.data.startsWith("data:image/")
+    );
     const lastUserText = [...validMessages].reverse().find(item => item.role === "user")?.content || "";
     const isWebSearchRequest = /\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/i.test(lastUserText);
     // Vision requests must use a vision model. Groq retired the old groq/compound ID; use compound-beta for web-search requests.
