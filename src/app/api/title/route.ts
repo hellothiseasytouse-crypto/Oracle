@@ -21,6 +21,21 @@ function corsHeaders(origin: string | null, requestOrigin: string) {
   return headers;
 }
 
+function parseApiKeys(raw: string, baseUrl: string): string[] {
+  if (/groq\.com/i.test(baseUrl)) {
+    const groqKeys = raw.match(/\bgsk_[A-Za-z0-9_-]+\b/g) ?? [];
+    if (groqKeys.length) return [...new Set(groqKeys)];
+  }
+  const keys = raw.split(/[\r\n,;\s]+/).map(value =>
+    value.trim()
+      .replace(/^Bearer\s+/i, "")
+      .replace(/^(?:\d+[.)]|[-*])/, "")
+      .replace(/^["'\`]+|["'\`]+$/g, "")
+      .trim()
+  ).filter(Boolean);
+  return [...new Set(keys)];
+}
+
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, { status: 204, headers: corsHeaders(request.headers.get("origin"), request.nextUrl.origin) });
 }
@@ -51,12 +66,10 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Naming keys are deliberately separate from conversation keys.
-  // A missing/exhausted naming pool must never affect a completed chat reply.
-  const keys = [...new Set([
-    ...(process.env.ORACLE_NAMING_API_KEYS || "").split(/[,;\s]+/),
-    process.env.ORACLE_NAMING_API_KEY || "",
-  ].map(key => key.trim()).filter(Boolean))];
+  // Keep naming keys separate from chat keys, but accept the same safe paste formats.
+  const baseUrl = (process.env.ORACLE_NAMING_API_BASE_URL || "https://api.groq.com/openai/v1").replace(/\/$/, "");
+  const rawKeyPool = [process.env.ORACLE_NAMING_API_KEYS || "", process.env.ORACLE_NAMING_API_KEY || ""].join("\n");
+  const keys = parseApiKeys(rawKeyPool, baseUrl);
   if (!keys.length) return NextResponse.json({ title: null, skipped: true }, { status: 200, headers });
 
   try {
@@ -65,7 +78,6 @@ export async function POST(request: NextRequest) {
     const assistantText = typeof body.assistantText === "string" ? body.assistantText.slice(0, 2500).trim() : "";
     if (!userText) return NextResponse.json({ title: null, skipped: true }, { status: 200, headers });
 
-    const baseUrl = (process.env.ORACLE_NAMING_API_BASE_URL || "https://api.groq.com/openai/v1").replace(/\/$/, "");
     const model = process.env.ORACLE_NAMING_MODEL || "openai/gpt-oss-20b";
     let lastError = "";
     for (const key of keys) {
