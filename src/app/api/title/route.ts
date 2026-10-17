@@ -30,7 +30,7 @@ function parseApiKeys(raw: string, baseUrl: string): string[] {
     value.trim()
       .replace(/^Bearer\s+/i, "")
       .replace(/^(?:\d+[.)]|[-*])/, "")
-      .replace(/^["'\`]+|["'\`]+$/g, "")
+      .replace(/^["']+|["']+$/g, "")
       .trim()
   ).filter(Boolean);
   return [...new Set(keys)];
