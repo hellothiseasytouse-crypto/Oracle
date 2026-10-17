@@ -37,13 +37,13 @@ export async function POST(request: NextRequest) {
   }
 
   const requireAuth = process.env.ORACLE_REQUIRE_AUTH === "true";
-  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\\/$/, "");
+  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
   if (requireAuth && (!supabaseUrl || !supabaseAnonKey)) {
     return NextResponse.json({ error: "Account protection is enabled but Supabase server settings are missing." }, { status: 503, headers });
   }
   if (requireAuth) {
-    const token = request.headers.get("authorization")?.replace(/^Bearer\\s+/i, "");
+    const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
     if (!token) return NextResponse.json({ error: "Sign in to ORACLE before sending a message." }, { status: 401, headers });
     try {
       const authResponse = await fetch(supabaseUrl + "/auth/v1/user", {
