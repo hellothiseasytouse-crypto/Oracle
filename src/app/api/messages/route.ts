@@ -36,6 +36,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "This website is not allowed to use the ORACLE API." }, { status: 403, headers });
   }
 
+  const requireAuth = process.env.ORACLE_REQUIRE_AUTH === "true";
+  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\\/$/, "");
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+  if (requireAuth && (!supabaseUrl || !supabaseAnonKey)) {
+    return NextResponse.json({ error: "Account protection is enabled but Supabase server settings are missing." }, { status: 503, headers });
+  }
+  if (requireAuth) {
+    const token = request.headers.get("authorization")?.replace(/^Bearer\\s+/i, "");
+    if (!token) return NextResponse.json({ error: "Sign in to ORACLE before sending a message." }, { status: 401, headers });
+    try {
+      const authResponse = await fetch(supabaseUrl + "/auth/v1/user", {
+        headers: { "apikey": supabaseAnonKey!, "Authorization": "Bearer " + token },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!authResponse.ok) return NextResponse.json({ error: "Your ORACLE session is invalid or expired. Please sign in again." }, { status: 401, headers });
+    } catch {
+      return NextResponse.json({ error: "Could not verify your ORACLE session. Please retry." }, { status: 503, headers });
+    }
+  }
+
   const apiKey = process.env.ORACLE_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
