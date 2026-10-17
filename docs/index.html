@@ -291,6 +291,7 @@ async function maybeShowImages(query,bubble){
  for(const [pattern,expanded] of aliases){if(pattern.test(original)){term=expanded+' '+term.replace(pattern,'').trim();break}}
  term=term.replace(/\s+/g,' ').trim()||original;
  const heading=document.createElement('p');heading.className='image-results-label';heading.textContent='Searching multiple image collections';bubble.appendChild(heading);
+  const googleLink=document.createElement('a');googleLink.className='image-search-note';googleLink.href='https://www.google.com/search?tbm=isch&q='+encodeURIComponent(term);googleLink.target='_blank';googleLink.rel='noopener noreferrer';googleLink.textContent='Also search Google Images ↗';googleLink.style.display='inline-block';googleLink.style.margin='4px 0 10px';bubble.appendChild(googleLink);
  const grid=document.createElement('div');grid.className='image-results';bubble.appendChild(grid);
  const loading=addActivityIndicator(grid,'Searching image indexes');
  const storageKey='oracleSeenImageResults.v1';
@@ -339,7 +340,7 @@ async function maybeShowImages(query,bubble){
    const copy=document.createElement('span');copy.className='image-result-copy';const title=document.createElement('strong');title.textContent=p.title;const desc=document.createElement('small');desc.textContent=p.extract.slice(0,125);const source=document.createElement('small');source.className='image-result-source';source.textContent=p.license+' · '+p.provider;copy.append(title,desc,source);card.append(img,copy);grid.append(card)
   }
   try{localStorage.setItem(storageKey,JSON.stringify(seen.slice(-300)))}catch{}
-  const note=document.createElement('small');note.className='image-search-note';note.textContent='Sources searched: Openverse (an aggregator of openly licensed media) and Wikimedia Commons. Results and image loading depend on each provider.';bubble.append(note);
+  const note=document.createElement('small');note.className='image-search-note';note.textContent='Inline results: Openverse and Wikimedia Commons. Google Images opens separately because Google does not provide a public unauthenticated image-search API for this static site.';bubble.append(note);
  }catch{loading.remove();grid.remove();heading.textContent='Could not load image results';const note=document.createElement('small');note.className='image-search-note';note.textContent='The image providers did not respond. Try again later or use more specific keywords.';bubble.appendChild(note)}
 }
 async function getWebSearchResults(query){
