@@ -138,11 +138,11 @@ export async function POST(request: NextRequest) {
     const validMessages = messages.filter((item): item is IncomingMessage =>
       !!item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string"
     ).slice(-80);
-    const recentMessages = validMessages.slice(-14);
-    let budget = 24000;
+    const recentMessages = validMessages.slice(-10);
+    let budget = 12000;
     for (const item of recentMessages) {
       if (budget <= 0) break;
-      const content = item.content.slice(-Math.min(5000, budget));
+      const content = item.content.slice(-Math.min(3000, budget));
       if (!content.trim()) continue;
       providerMessages.push({ role: item.role, content });
       budget -= content.length;
@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
       : isGroq && isWebSearchRequest
         ? "openai/gpt-oss-120b"
         : configuredModel === "llama-3.3-70b-versatile" ? "openai/gpt-oss-120b" : configuredModel;
-    const useBrowserSearch = isGroq && isWebSearchRequest && !hasImageAttachments;
+    // Do not pass an unexecuted browser_search tool to Groq. The previous implementation\n    // forced a tool call but never ran the returned tool call, causing provider errors such\n    // as “tool choice is required” and “model called a tool”. Keep chat reliable until a\n    // real search execution loop is implemented.\n    const useBrowserSearch = false;
     let upstream: Response | null = null;
     let activeApiKey = apiKeys[0];
     let attemptedKeys = 0;
@@ -224,8 +224,7 @@ export async function POST(request: NextRequest) {
           model,
           messages: providerMessages,
           temperature: 0.4,
-          max_tokens: 2048,
-          ...(useBrowserSearch ? { tools: [{ type: "browser_search" }], tool_choice: "required" } : {}),
+          max_tokens: 1024,
         }),
         signal: AbortSignal.timeout(60000),
       });
@@ -264,7 +263,7 @@ export async function POST(request: NextRequest) {
         const retry = await fetch(baseUrl + "/chat/completions", {
           method: "POST",
           headers: { "Authorization": "Bearer " + activeApiKey, "Content-Type": "application/json" },
-          body: JSON.stringify({ model, messages: compactMessages, temperature: 0.4, max_tokens: 1200 }),
+          body: JSON.stringify({ model, messages: compactMessages, temperature: 0.4, max_tokens: 900 }),
           signal: AbortSignal.timeout(60000),
         });
         data = await retry.json().catch(() => ({}));
