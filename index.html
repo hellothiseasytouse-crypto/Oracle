@@ -114,7 +114,7 @@ async function send(){
  prompt.value='';prompt.style.height='';attached=[];updateAttachments();
  const waiting=addMessage('assistant','Thinking…','');
  try {
-   const endpoint=window.ORACLE_API_URL || '';
+   const endpoint=window.ORACLE_API_URL || (location.hostname.endsWith('github.io') ? '' : '/api/messages');
    if(!endpoint) throw new Error('No AI backend is configured yet. The website needs a separately hosted backend before it can generate real AI replies.');
    const attachments=await Promise.all(filesNow.map(async f=>{
      if(f.size>12*1024*1024) throw new Error(f.name+' is larger than the 12 MB preview limit.');
@@ -125,8 +125,9 @@ async function send(){
      return item;
    }));
    const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:conversation,attachments})});
-   if(!response.ok) throw new Error('AI server returned HTTP '+response.status+'. Check the backend deployment and API key.');
-   const data=await response.json();const answer=data.reply||data.message||data.output_text||data.choices?.[0]?.message?.content;
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok) throw new Error(data.error || ('AI server returned HTTP '+response.status+'. Check the backend deployment and API key.'));
+   const answer=data.reply||data.message||data.output_text||data.choices?.[0]?.message?.content;
    if(!answer) throw new Error('The server responded, but no answer text was returned.');
    waiting.querySelector('.bubble').innerHTML=renderMD(answer);
    conversation.push({role:'assistant',content:answer});
@@ -160,6 +161,13 @@ const composer=$('.composer');composer.addEventListener('dragover',e=>{e.prevent
 $('exportBtn').addEventListener('click',()=>{if(!conversation.length){toast('There is no conversation to export yet.');return}const blob=new Blob([conversation.map(m=>(m.role==='user'?'You':'ORACLE')+'\n'+m.content).join('\n\n---\n\n')],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='oracle-conversation.txt';a.click();URL.revokeObjectURL(url);toast('Conversation exported')});
 const info=()=>toast('Preview mode: no AI backend or file-upload service is connected.');$('infoBtn').addEventListener('click',info);$('aboutBtn').addEventListener('click',()=>alert('ORACLE — Intelligence Workspace\n\nThis is the first functional frontend preview. Chat, conversation reset, export, responsive navigation, and message formatting are available. AI generation and file processing require a secure backend connection.'));
 $('menuBtn').addEventListener('click',()=>{$('sidebar').classList.add('open');$('backdrop').classList.add('show')});$('backdrop').addEventListener('click',closeMenu);
+// Set this to the deployed backend URL after deploying the Next.js API, e.g.
+// window.ORACLE_API_URL = 'https://your-oracle-backend.vercel.app/api/messages';
+if(location.hostname.endsWith('github.io')) {
+  $('modeNotice').textContent = 'GitHub Pages frontend · Add your deployed ORACLE backend URL to enable AI replies. No API key belongs in this page.';
+} else {
+  $('modeNotice').textContent = 'ORACLE workspace · AI replies use the server configuration when ORACLE_API_KEY is set.';
+}
 })();
 </script>
 </body>
