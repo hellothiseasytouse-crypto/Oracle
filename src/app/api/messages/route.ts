@@ -28,6 +28,21 @@ export async function OPTIONS(request: NextRequest) {
 type IncomingMessage = { role: "user" | "assistant"; content: string };
 type IncomingAttachment = { name: string; type?: string; size?: number; data?: string };
 
+function parseApiKeys(raw: string, baseUrl: string): string[] {
+  if (/groq\.com/i.test(baseUrl)) {
+    const groqKeys = raw.match(/\bgsk_[A-Za-z0-9_-]+\b/g) ?? [];
+    if (groqKeys.length) return [...new Set(groqKeys)];
+  }
+  const keys = raw.split(/[\r\n,;\s]+/).map(value =>
+    value.trim()
+      .replace(/^Bearer\s+/i, "")
+      .replace(/^(?:\d+[.)]|[-*])/, "")
+      .replace(/^["'\`]+|["'\`]+$/g, "")
+      .trim()
+  ).filter(Boolean);
+  return [...new Set(keys)];
+}
+
 export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
   const headers = corsHeaders(origin, request.nextUrl.origin);
@@ -148,7 +163,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const baseUrl = (process.env.ORACLE_API_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
     const configuredModel = process.env.ORACLE_MODEL || "openai/gpt-oss-120b";
     const hasImageAttachments = providerMessages.some(message =>
       Array.isArray(message.content) && message.content.some((part: any) => part?.type === "image_url")
