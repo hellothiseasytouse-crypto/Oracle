@@ -70,8 +70,8 @@ export async function POST(request: NextRequest) {
     const attachments = Array.isArray(body.attachments) ? body.attachments as IncomingAttachment[] : [];
     const memory = typeof body.memory === "string" ? body.memory.slice(0, 12000).trim() : "";
 
-    if (!messages.length || messages.length > 80) {
-      return NextResponse.json({ error: "Send a conversation containing between 1 and 80 messages." }, { status: 400, headers });
+    if (!messages.length) {
+      return NextResponse.json({ error: "Send at least one message." }, { status: 400, headers });
     }
 
     const providerMessages: Array<Record<string, unknown>> = [{
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     // This avoids context-window / request-size errors as a conversation grows.
     const validMessages = messages.filter((item): item is IncomingMessage =>
       !!item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string"
-    );
+    ).slice(-80);
     const recentMessages = validMessages.slice(-14);
     let budget = 24000;
     for (const item of recentMessages) {
