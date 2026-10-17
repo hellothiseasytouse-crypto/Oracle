@@ -146,11 +146,13 @@ export async function POST(request: NextRequest) {
     const hasImageAttachments = attachments.some(file => !!file && typeof file.type === "string" && file.type.startsWith("image/") && typeof file.data === "string" && file.data.startsWith("data:image/"));
     const lastUserText = [...validMessages].reverse().find(item => item.role === "user")?.content || "";
     const isWebSearchRequest = /\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/i.test(lastUserText);
-    // Groq's general text model rejects multimodal content; Compound can search the live web.
-    const model = /groq\.com/i.test(baseUrl) && hasImageAttachments
+    // Vision requests must use a vision model. Groq retired the old groq/compound ID; use compound-beta for web-search requests.
+    // If an image is attached, keep the vision model and let the frontend-provided search results supply web context.
+    const isGroq = /groq\.com/i.test(baseUrl);
+    const model = isGroq && hasImageAttachments
       ? "qwen/qwen3.6-27b"
-      : /groq\.com/i.test(baseUrl) && isWebSearchRequest
-        ? "groq/compound"
+      : isGroq && isWebSearchRequest
+        ? "compound-beta"
         : configuredModel === "llama-3.3-70b-versatile" ? "openai/gpt-oss-120b" : configuredModel;
     const upstream = await fetch(baseUrl + "/chat/completions", {
       method: "POST",
