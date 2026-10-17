@@ -167,11 +167,13 @@ export async function POST(request: NextRequest) {
         : configuredModel === "llama-3.3-70b-versatile" ? "openai/gpt-oss-120b" : configuredModel;
     const useBrowserSearch = isGroq && isWebSearchRequest && !hasImageAttachments;
     let upstream: Response | null = null;
+    let activeApiKey = apiKeys[0];
     let data: any = {};
     let lastProviderError = "No configured API key could complete the request.";
     // Try keys in configured order. Quota/rate-limit/auth failures are key-specific;
     // do not change the loading/thinking UI on the client while this loop runs.
     for (const apiKey of apiKeys) {
+      activeApiKey = apiKey;
       const candidate = await fetch(baseUrl + "/chat/completions", {
         method: "POST",
         headers: {
