@@ -56,10 +56,15 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const apiKey = process.env.ORACLE_API_KEY;
-  if (!apiKey) {
+  // Keys are configured as a comma- or newline-separated list. The legacy single key
+  // remains supported, and the list length is never hard-coded.
+  const apiKeys = [...new Set([
+    ...(process.env.ORACLE_API_KEYS || "").split(/[\\,\\n]/),
+    process.env.ORACLE_API_KEY || "",
+  ].map(key => key.trim()).filter(Boolean))];
+  if (!apiKeys.length) {
     return NextResponse.json(
-      { error: "The AI backend is deployed, but ORACLE_API_KEY has not been configured in the server environment." },
+      { error: "The AI backend is deployed, but no ORACLE_API_KEYS / ORACLE_API_KEY values are configured on the server." },
       { status: 503, headers },
     );
   }
@@ -161,23 +166,50 @@ export async function POST(request: NextRequest) {
         ? "openai/gpt-oss-120b"
         : configuredModel === "llama-3.3-70b-versatile" ? "openai/gpt-oss-120b" : configuredModel;
     const useBrowserSearch = isGroq && isWebSearchRequest && !hasImageAttachments;
-    const upstream = await fetch(baseUrl + "/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer " + apiKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        messages: providerMessages,
-        temperature: 0.7,
-        max_tokens: 2048,
-        ...(useBrowserSearch ? { tools: [{ type: "browser_search" }], tool_choice: "required" } : {}),
-      }),
-      signal: AbortSignal.timeout(60000),
-    });
-
-    let data = await upstream.json().catch(() => ({}));
+    let upstream: Response | null = null;
+    let data: any = {};
+    let lastProviderError = "No configured API key could complete the request.";
+    // Try keys in configured order. Quota/rate-limit/auth failures are key-specific;
+    // do not change the loading/thinking UI on the client while this loop runs.
+    for (const apiKey of apiKeys) {
+      const candidate = await fetch(baseUrl + "/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages: providerMessages,
+          temperature: 0.7,
+          max_tokens: 2048,
+          ...(useBrowserSearch ? { tools: [{ type: "browser_search" }], tool_choice: "required" } : {}),
+        }),
+        signal: AbortSignal.timeout(60000),
+      });
+      const candidateData = await candidate.json().catch(() => ({}));
+      if (candidate.ok) {
+        upstream = candidate;
+        data = candidateData;
+        break;
+      }
+      lastProviderError = typeof candidateData?.error?.message === "string"
+        ? candidateData.error.message
+        : "The AI provider rejected the request.";
+      const keyUnavailable = [401, 402, 403, 429].includes(candidate.status) ||
+        /rate.?limit|quota|tokens per day|billing|insufficient.*credit|api key|authentication|permission denied/i.test(lastProviderError);
+      if (!keyUnavailable) {
+        upstream = candidate;
+        data = candidateData;
+        break;
+      }
+      upstream = candidate;
+      data = candidateData;
+    }
+    if (!upstream) {
+      return NextResponse.json({ error: lastProviderError }, { status: 503, headers });
+    }
+    // `data` is the response from the first key that succeeded, or the last failure.
     if (!upstream.ok) {
       const message = typeof data?.error?.message === "string" ? data.error.message : "The AI provider rejected the request.";
       const oversized = upstream.status === 400 && /context.?length|too many tokens|request too large|input.{0,20}too long|maximum context/i.test(message);
