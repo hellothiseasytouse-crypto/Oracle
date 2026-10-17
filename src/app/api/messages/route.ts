@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
   // Keys are configured as a comma- or newline-separated list. The legacy single key
   // remains supported, and the list length is never hard-coded.
   const apiKeys = [...new Set([
-    ...(process.env.ORACLE_API_KEYS || "").split(/[\\,\\n]/),
+    ...(process.env.ORACLE_API_KEYS || "").split(/[,\n]/),
     process.env.ORACLE_API_KEY || "",
   ].map(key => key.trim()).filter(Boolean))];
   if (!apiKeys.length) {
