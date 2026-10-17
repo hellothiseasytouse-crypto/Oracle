@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
   // Naming keys are deliberately separate from conversation keys.
   // A missing/exhausted naming pool must never affect a completed chat reply.
   const keys = [...new Set([
-    ...(process.env.ORACLE_NAMING_API_KEYS || "").split(/[,\n]/),
+    ...(process.env.ORACLE_NAMING_API_KEYS || "").split(/[,;\s]+/),
     process.env.ORACLE_NAMING_API_KEY || "",
   ].map(key => key.trim()).filter(Boolean))];
   if (!keys.length) return NextResponse.json({ title: null, skipped: true }, { status: 200, headers });
