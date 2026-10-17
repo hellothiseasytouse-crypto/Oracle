@@ -190,7 +190,8 @@ export async function POST(request: NextRequest) {
     let activeApiKey = apiKeys[0];
     let attemptedKeys = 0;
     let data: any = {};
-    let lastProviderError = "No configured API key could complete the request.";\n    let lastProviderStatus = 0;
+    let lastProviderError = "No configured API key could complete the request.";
+    let lastProviderStatus = 0;
     // Try keys in configured order. Quota/rate-limit/auth failures are key-specific;
     // do not change the loading/thinking UI on the client while this loop runs.
     for (const apiKey of apiKeys) {
@@ -217,6 +218,7 @@ export async function POST(request: NextRequest) {
         data = candidateData;
         break;
       }
+      lastProviderStatus = candidate.status;
       lastProviderError = typeof candidateData?.error?.message === "string"
         ? candidateData.error.message
         : "The AI provider rejected the request.";
