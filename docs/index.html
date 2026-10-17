@@ -88,6 +88,31 @@ button:hover:not(:disabled){transform:translateY(-1px)}button:active:not(:disabl
 .oracle-web-results{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}.oracle-web-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:9px}.oracle-web-result{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);text-decoration:none;transition:transform .18s,border-color .18s,background .18s}.oracle-web-result:hover{transform:translateY(-2px);border-color:var(--accent2);background:var(--panel2)}.oracle-web-result small{color:var(--muted);line-height:1.5}.oracle-web-result span{font-size:10px;color:var(--accent)}
 .nav-action svg,.side-link svg{transition:transform .22s ease,filter .22s ease}.nav-action:hover svg,.side-link:hover svg{transform:translateY(-2px) rotate(-5deg);filter:drop-shadow(0 0 5px #b9a7ff70)}.nav-action:active svg,.side-link:active svg{transform:scale(.9)}
 @media(prefers-reduced-motion:reduce){.oracle-dots i{animation:none}}
+
+/* Workspace refinement */
+:root{--bg:#0d0d13;--panel:#15151e;--panel2:#1d1c29;--line:#2b2939;--accent:#c0b0ff;--accent2:#907ce8}
+body{background:radial-gradient(ellipse at 72% 0%,#211b3429,transparent 42%),var(--bg)}
+.sidebar{background:linear-gradient(180deg,#15141d 0%,#111117 100%);backdrop-filter:blur(18px)}
+.main{background:radial-gradient(ellipse at 55% 12%,#211b3218,transparent 45%)}
+.topbar{background:#111117c9;backdrop-filter:blur(14px)}
+.nav-action{min-height:40px;border:1px solid transparent}
+.nav-action:hover{border-color:#a995f025;background:linear-gradient(90deg,#b8a8f510,transparent)}
+.chat-row.active{background:#b9a7ff0c;box-shadow:inset 2px 0 #b9a7ff}
+.chat-row .history-item{font-size:13px}
+.sidebar-scroll{scrollbar-width:thin;scrollbar-color:#393448 transparent}
+.composer,.composer-wrap{border-color:#373247}
+textarea#prompt{line-height:1.65}
+.bubble{overflow-wrap:anywhere}
+.oracle-page{background:radial-gradient(ellipse at 75% 0%,#33264c35,transparent 44%),#09090f}
+.page-card{border-color:#343044!important;background:linear-gradient(145deg,#171620,#111117)!important;box-shadow:0 10px 28px #00016}
+.page-row{border-bottom:1px solid #292737;padding:12px 0}
+.page-row:last-child{border-bottom:0}
+.oracle-page button,.oracle-memory-page button,.oracle-vault-page button{min-height:38px}
+.oracle-page button.primary{box-shadow:0 6px 20px #a995f018}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline-offset:2px}
+@media(max-width:760px){.app{grid-template-columns:minmax(0,1fr)}.sidebar{box-shadow:18px 0 50px #0007}.topbar{position:sticky;top:0;z-index:10}.oracle-page{padding:18px}.page-card{padding:16px!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
 </style>
 </head>
 <body>
@@ -103,6 +128,7 @@ button:hover:not(:disabled){transform:translateY(-1px)}button:active:not(:disabl
     <button class="nav-action" id="memoryBtn" type="button"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-4 12.75c.8.55 1 1.15 1 2.25h6c0-1.1.2-1.7 1-2.25A7 7 0 0 0 12 3Z"/><path d="M9 21h6M10 18h4"/></svg><span>Memory</span></button>
     <button class="nav-action" id="vaultBtn" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg><span>Image Vault</span></button>
     <button class="nav-action" id="exportSideBtn" type="button"><svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5"/><path d="M5 17v4h14v-4"/></svg><span>Export conversation</span></button>
+    <button class="nav-action" id="storageBtn" type="button"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/></svg><span>Storage &amp; Data</span></button>
   </nav>
   <div class="sidebar-scroll">
     <section class="sidebar-section pinned-section"><div class="section-heading">Pinned</div><div class="sidebar-empty">Pin important conversations to keep them here.</div></section>
@@ -380,6 +406,38 @@ $('searchChatsBtn').addEventListener('click',()=>{const input=$('historySearch')
 $('historySearch').addEventListener('input',filterHistory);
 $('memoryBtn').addEventListener('click',openMemoryPage);
 $('vaultBtn').addEventListener('click',openImageVaultPage);
+$('storageBtn').addEventListener('click',openStoragePage);
+
+function openStoragePage(){
+ document.querySelectorAll('.oracle-page').forEach(x=>x.remove());
+ const page=document.createElement('section');page.className='oracle-page';
+ const shell=document.createElement('div');shell.className='oracle-page-shell';
+ const head=document.createElement('div');head.className='oracle-page-head';
+ const title=document.createElement('div');title.innerHTML='<div class="oracle-page-kicker">ORACLE / WORKSPACE HEALTH</div><h1>Storage &amp; Data</h1><div class="muted">Manage your local data, make backups, and see what is using space.</div>';
+ const close=document.createElement('button');close.className='secondary';close.type='button';close.textContent='← Workspace';close.onclick=()=>page.remove();head.append(title,close);
+ const intro=document.createElement('div');intro.className='page-card';intro.style.margin='24px 0';intro.innerHTML='<strong>Stored in this browser</strong><p class="muted" style="line-height:1.7;margin:7px 0 0">Chats, memories, reminders, and saved images currently live in this browser on this device. Clearing browser site data can erase them. This page creates a backup you can download and restore later; it does not enable cloud sync.</p>';
+ const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:18px';
+ const rows=document.createElement('div');rows.className='page-card';rows.style.marginBottom='18px';
+ const actions=document.createElement('div');actions.className='page-card';actions.style.cssText+=';display:grid;gap:14px';
+ const status=document.createElement('p');status.className='muted';status.style.cssText='margin:0;line-height:1.6';
+ function bytes(n){if(n<1024)return n+' B';if(n<1024*1024)return (n/1024).toFixed(1)+' KB';return (n/1024/1024).toFixed(2)+' MB'}
+ function collect(){const keys=['oracleChats.v2','oracleMemory.v1','oracleScheduledTasks','oracleImageVault.v1','oracleDisplayName'];const data={format:'ORACLE_WORKSPACE_BACKUP',version:1,createdAt:new Date().toISOString(),data:{}};let total=0;for(const k of keys){const raw=localStorage.getItem(k);if(raw!==null){data.data[k]=raw;total+=new Blob([raw]).size}}return {data,total,keys}}
+ function metric(name,value,detail){const card=document.createElement('article');card.className='page-card';const label=document.createElement('div');label.className='muted';label.textContent=name;const val=document.createElement('div');val.textContent=value;val.style.cssText='font-size:25px;font-weight:750;letter-spacing:-.04em;margin:8px 0 4px';const desc=document.createElement('div');desc.className='muted';desc.textContent=detail;card.append(label,val,desc);grid.append(card)}
+ function button(label,kind,fn){const b=document.createElement('button');b.type='button';b.className=kind;b.textContent=label;b.addEventListener('click',fn);return b}
+ function downloadBackup(){const payload=collect().data;const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='oracle-workspace-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);status.textContent='Backup prepared. Keep the JSON file somewhere safe.'}
+ function importBackup(file){if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const obj=JSON.parse(String(reader.result||''));if(obj.format!=='ORACLE_WORKSPACE_BACKUP'||!obj.data||typeof obj.data!=='object')throw new Error('This does not look like an ORACLE workspace backup.');const allowed=['oracleChats.v2','oracleMemory.v1','oracleScheduledTasks','oracleImageVault.v1','oracleDisplayName'];if(!confirm('Restore this backup? Matching ORACLE data on this browser will be replaced. Download a backup first if you want to keep the current version.'))return;for(const k of allowed){if(typeof obj.data[k]==='string'){JSON.parse(obj.data[k]);localStorage.setItem(k,obj.data[k])}}status.textContent='Backup restored. Reloading the workspace…';setTimeout(()=>location.reload(),700)}catch(e){status.textContent='Import failed: '+(e.message||'Invalid backup file.')}};reader.readAsText(file)}
+ function clearKey(key,label){if(!confirm('Delete '+label+' from this browser? This cannot be undone unless you have a backup.'))return;localStorage.removeItem(key);status.textContent=label+' cleared.';draw()}
+ function draw(){grid.replaceChildren();const x=collect(),d=x.data.data;let chatsCount=0,mem=0,vault=0,tasks=0;try{chatsCount=JSON.parse(d['oracleChats.v2']||'[]').length}catch{}try{mem=JSON.parse(d['oracleMemory.v1']||'[]').length}catch{}try{vault=JSON.parse(d['oracleImageVault.v1']||'[]').length}catch{}try{tasks=JSON.parse(d.oracleScheduledTasks||'[]').length}catch{}metric('Local data size',bytes(x.total),'Approximate size of ORACLE data');metric('Conversations',String(chatsCount),'Saved chat threads');metric('Memories',String(mem),'Personal facts and preferences');metric('Saved images',String(vault),'Image Vault entries');rows.replaceChildren();const h=document.createElement('h2');h.textContent='Storage breakdown';h.style.cssText='font-size:17px;margin:0 0 12px';rows.append(h);const info=[['Conversation history','oracleChats.v2',d['oracleChats.v2'],'Includes saved chat messages'],['Memory','oracleMemory.v1',d['oracleMemory.v1'],mem+' saved items'],['Scheduled tasks','oracleScheduledTasks',d.oracleScheduledTasks,tasks+' reminders'],['Image Vault','oracleImageVault.v1',d['oracleImageVault.v1'],vault+' saved image entries'],['Display name','oracleDisplayName',d.oracleDisplayName,'Workspace profile']];for(const [name,key,value,desc] of info){const row=document.createElement('div');row.className='page-row';row.style.cssText+=';align-items:center;gap:14px';const main=document.createElement('div');main.className='row-main';const strong=document.createElement('strong');strong.textContent=name;const p=document.createElement('p');p.className='muted';p.textContent=desc+' · '+(value===undefined?'Not saved':bytes(new Blob([value]).size));main.append(strong,p);const del=button('Clear','danger',()=>clearKey(key,name));del.disabled=value===undefined;row.append(main,del);rows.append(row)}status.textContent='Browser storage is available; the browser decides its actual quota. Approximate tracked data: '+bytes(x.total)+'. Images themselves may be hosted externally; the vault mainly saves their links and metadata.'}
+ const exportBtn=button('↓ Download full workspace backup','primary',downloadBackup);
+ const file=document.createElement('input');file.type='file';file.accept='application/json,.json';file.hidden=true;file.addEventListener('change',()=>{importBackup(file.files&&file.files[0]);file.value=''});
+ const importBtn=button('↑ Restore from backup','secondary',()=>file.click());
+ const persistBtn=button('Keep site data available','secondary',async()=>{if(navigator.storage&&navigator.storage.persist){try{const granted=await navigator.storage.persist();status.textContent=granted?'The browser granted persistent-storage permission.':'The browser did not grant persistent-storage permission; keep regular backups.'}catch{status.textContent='This browser could not change storage persistence settings.'}}else status.textContent='Persistent storage permission is not supported in this browser.'});
+ const refreshBtn=button('↻ Refresh storage report','secondary',draw);
+ actions.append(exportBtn,importBtn,file,persistBtn,refreshBtn,status);
+ const note=document.createElement('p');note.className='muted';note.style.cssText='font-size:12px;line-height:1.7;margin-top:18px';note.textContent='Privacy note: backups include conversation text, memories, reminders, image links, and your display name. They do not include AI provider keys or Supabase credentials. Treat backup files as private.';
+ shell.append(head,intro,grid,rows,actions,note);page.append(shell);document.body.append(page);draw()
+}
+
 
 $('scheduleBtn').addEventListener('click',openSchedulePage);
 function loadScheduled(){try{const x=JSON.parse(localStorage.getItem('oracleScheduledTasks')||'[]');return Array.isArray(x)?x:[]}catch{return []}}
