@@ -555,9 +555,39 @@ function addMessage(role,text,meta=''){
 function refreshHistory(title){const chat=currentChat();if(chat){const first=conversation.find(m=>m.role==='user');if(first&&!chat.customTitle){chat.title=makeChatTitle(first.content||title);chat.autoTitleSource=first.content||title}chat.updatedAt=Date.now()}saveChats();renderHistory()}
 function filterHistory(){const q=($('historySearch').value||'').trim().toLowerCase();let shown=0;document.querySelectorAll('#history .history-item').forEach(item=>{const match=item.textContent.toLowerCase().includes(q);item.style.display=match?'':'none';if(match)shown++});$('historyEmpty').style.display=shown?'none':'block';$('historyEmpty').textContent=q?'No matching conversations.':(chats.length?'No conversations match this filter.':'Your recent conversations will appear here.')}
 let oracleSending=false;
+async function requestAIConversationTitle(messagesEndpoint,userText,assistantText,chatId){
+ try{
+  if(!messagesEndpoint||!userText)return;
+  const titleUrl=new URL(messagesEndpoint,location.href);
+  if(!/\\/api\\/messages\\/?$/.test(titleUrl.pathname))return;
+  titleUrl.pathname=titleUrl.pathname.replace(/messages\\/?$/,'title');
+  titleUrl.search='';
+  titleUrl.hash='';
+  const headers={'Content-Type':'application/json'};
+  if(supabaseClient){try{const {data:{session}}=await supabaseClient.auth.getSession();if(session?.access_token)headers.Authorization='Bearer '+session.access_token}catch{}}
+  const response=await fetch(titleUrl.toString(),{method:'POST',headers,body:JSON.stringify({userText:String(userText).slice(0,5000),assistantText:String(assistantText).slice(0,2500)})});
+  if(!response.ok)return;
+  const data=await response.json().catch(()=>({}));
+  const title=typeof data.title==='string'?data.title.trim():'';
+  if(!title||!chatId)return;
+  const chat=chats.find(item=>item.id===chatId);
+  if(!chat||chat.customTitle)return;
+  // Only apply this result if it still names the first message of this conversation.
+  const first=chat.messages?.find(item=>item.role==='user');
+  if(first&&String(first.content||'').slice(0,5000)!==String(userText).slice(0,5000))return;
+  chat.title=title.slice(0,72);
+  chat.autoTitleSource=String(userText).slice(0,5000);
+  chat.updatedAt=Date.now();
+  saveChats();
+  renderHistory();
+ }catch{
+  // Title generation is optional: naming failures must stay invisible and never fail a reply.
+ }
+}
+
 async function send(){
  if(oracleSending)return;
- const text=prompt.value.trim();if(!text&&!attached.length){prompt.focus();return;}
+ const text=prompt.value.trim();if(!text&&!attached.length){prompt.focus();return;}\n const requestChatId=activeChatId;
  oracleSending=true;$('sendBtn').disabled=true;$('sendBtn').setAttribute('aria-busy','true');$('sendBtn').classList.add('sending');
  const filesNow=[...attached];
  const imagePreviews=filesNow.filter(f=>f.type.startsWith('image/')).map(f=>URL.createObjectURL(f));
@@ -598,8 +628,7 @@ async function send(){
    conversation.push({role:'assistant',content:answer});
    await maybeShowImages(text,waiting.querySelector('.bubble'));
    await maybeSearchWeb(text,waiting.querySelector('.bubble'),webPages);
-   saveCurrent();
-   if(readAloud&&'speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(answer.replace(/[#*\x60>]/g,'')))}
+   saveCurrent();\n   void requestAIConversationTitle(endpoint,text||shown,answer,requestChatId);\n   if(readAloud&&'speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(answer.replace(/[#*\x60>]/g,'')))}
  } catch(err) {
    waiting.querySelector('.bubble').innerHTML=renderMD('**ORACLE can’t reach its AI model yet.**\n\n'+endpointSafeError(err)+'\n\nThe request failed before ORACLE could finish processing it. If you attached a file, check the backend error above and try again after the server update is deployed.');
    conversation.push({role:'assistant',content:'ORACLE connection status: '+endpointSafeError(err)});saveCurrent();
