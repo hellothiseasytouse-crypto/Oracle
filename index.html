@@ -186,6 +186,57 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline-offset:2
 @media(max-width:620px){.account-overlay{padding:0!important;align-items:stretch!important}.account-panel{max-height:100dvh!important;width:100%!important;border-radius:0!important;border-left:0!important;border-right:0!important;padding:16px!important}.settings-tabs{top:93px}.account-head{top:0}.account-grid{grid-template-columns:1fr!important}.account-actions button{flex:1 1 140px}.account-section{scroll-margin-top:160px!important}}
 
 </style>
+<style id="oracle-settings-redesign">
+/* Clean, usable settings layout: real section switching instead of sticky scroll tabs */
+#accountOverlay{padding:24px!important;align-items:center!important;justify-content:center!important}
+#accountOverlay .account-panel{width:min(940px,100%)!important;max-height:min(86dvh,820px)!important;padding:0!important;display:grid!important;grid-template-columns:205px minmax(0,1fr)!important;grid-template-rows:auto minmax(0,1fr)!important;gap:0!important;overflow:hidden!important;border:1px solid #343342!important;border-radius:20px!important;background:#101016!important}
+#accountOverlay .account-head{grid-column:1/-1!important;position:relative!important;top:auto!important;padding:24px 26px 19px!important;margin:0!important;background:#101016!important;border-bottom:1px solid #292834!important;align-items:center!important}
+#accountOverlay .account-head .eyebrow{font-size:10px!important;letter-spacing:.16em!important;color:#b9a7ff!important}
+#accountOverlay .account-head h2{font-size:25px!important;line-height:1.2!important;margin:7px 0 5px!important;letter-spacing:-.04em!important}
+#accountOverlay .account-head p{font-size:12px!important;margin:0!important;color:#9998aa!important}
+#accountOverlay .settings-tabs{grid-column:1;grid-row:2;position:relative!important;top:auto!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:4px!important;overflow:visible!important;padding:18px 12px!important;margin:0!important;border:0!important;border-right:1px solid #292834!important;background:#0d0d13!important}
+#accountOverlay .settings-tab{width:100%!important;min-height:42px!important;justify-content:flex-start!important;flex:0 0 auto!important;padding:10px 12px!important;border:1px solid transparent!important;border-radius:9px!important;text-align:left!important;font-size:12px!important;color:#aaa9ba!important}
+#accountOverlay .settings-tab span{width:19px!important;text-align:center!important;font-size:15px!important}
+#accountOverlay .settings-tab:hover{background:#1a1924!important}
+#accountOverlay .settings-tab.active{background:#242033!important;border-color:#3c3455!important;color:#f4f0ff!important}
+#accountOverlay .account-section{grid-column:2;grid-row:2;min-width:0;overflow-y:auto;overscroll-behavior:contain;margin:0!important;padding:24px clamp(18px,3vw,30px)!important;border:0!important;border-radius:0!important;background:#101016!important;scroll-margin:0!important}
+#accountOverlay .account-section h3{font-size:18px!important;margin:0 0 7px!important;letter-spacing:-.02em!important}
+#accountOverlay .account-note{font-size:12px!important;line-height:1.65!important;color:#a2a0b2!important;margin:0 0 18px!important}
+#accountOverlay .account-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:15px!important}
+#accountOverlay .account-field{min-width:0!important;margin:0!important;gap:7px!important}
+#accountOverlay .account-field.full{grid-column:1/-1!important}
+#accountOverlay .account-field label{font-size:11px!important;color:#c6c3d3!important;margin:0!important}
+#accountOverlay .account-field input{min-width:0!important;width:100%!important;min-height:42px!important;padding:10px 12px!important;font-size:12px!important;background:#0a0a10!important;border:1px solid #333242!important;border-radius:9px!important}
+#accountOverlay .account-actions{display:flex!important;gap:8px!important;flex-wrap:wrap!important;margin:18px 0 0!important}
+#accountOverlay .account-actions button,#accountOverlay .account-section button:not(.icon-btn){min-height:39px!important;padding:9px 12px!important;border-radius:9px!important;font-size:12px!important;font-weight:550!important;background:#1a1924!important;border:1px solid #363347!important;color:#e7e4f1!important}
+#accountOverlay .account-actions button.primary,#accountOverlay .account-section button.primary{background:#c2b4fa!important;border-color:transparent!important;color:#171321!important;font-weight:700!important}
+#accountOverlay .account-actions button:hover,#accountOverlay .account-section button:not(.icon-btn):hover{border-color:#75689a!important}
+#accountOverlay .account-status{margin-top:15px!important;padding:11px 12px!important;min-height:0!important;border:1px solid #302d3d!important;border-radius:9px!important;background:#0b0b11!important;font-size:11px!important;line-height:1.6!important}
+#accountOverlay .account-section>.account-note:last-child{margin-top:16px!important}
+#accountOverlay .account-section.hidden{display:none!important}
+@media(max-width:680px){
+ #accountOverlay{padding:8px!important;align-items:stretch!important}
+ #accountOverlay .account-panel{width:100%!important;max-height:calc(100dvh - 16px)!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto minmax(0,1fr)!important;border-radius:15px!important}
+ #accountOverlay .account-head{grid-column:1;grid-row:1;padding:17px 16px 13px!important}
+ #accountOverlay .account-head h2{font-size:22px!important}
+ #accountOverlay .settings-tabs{grid-column:1;grid-row:2;flex-direction:row!important;gap:5px!important;padding:9px 10px!important;overflow-x:auto!important;border-right:0!important;border-bottom:1px solid #292834!important}
+ #accountOverlay .settings-tab{width:auto!important;min-width:max-content!important;min-height:38px!important;padding:8px 10px!important;font-size:11px!important}
+ #accountOverlay .settings-tab span{width:auto!important}
+ #accountOverlay .account-section{grid-column:1;grid-row:3;padding:18px 16px!important}
+ #accountOverlay .account-grid{grid-template-columns:minmax(0,1fr)!important}
+ #accountOverlay .account-field.full{grid-column:auto!important}
+ #accountOverlay .account-actions button{flex:1 1 100%!important}
+}
+.oracle-memory-page,.oracle-vault-page{background:radial-gradient(ellipse at 50% -20%,#242039 0,transparent 48%),#090a10!important;padding:clamp(16px,4vw,48px)!important}
+.oracle-memory-page h1,.oracle-vault-page h1{font-weight:650!important;letter-spacing:-.045em!important;line-height:1.1!important}
+.oracle-memory-page button,.oracle-vault-page button{transition:background .15s,border-color .15s,transform .15s!important}
+.oracle-memory-page button:hover,.oracle-vault-page button:hover{border-color:#7668a4!important;background:#252235!important}
+.oracle-memory-page input,.oracle-vault-page input{outline:none!important}
+.oracle-memory-page input:focus,.oracle-vault-page input:focus{border-color:#8977c0!important;box-shadow:0 0 0 3px #a99ae91b!important}
+.oracle-memory-page form,.oracle-vault-page .vault-controls{box-shadow:0 12px 40px #0002}
+.oracle-memory-page [data-memory-item],.oracle-vault-page .vault-card{border-color:#302d40!important}
+@media(max-width:540px){.oracle-memory-page>div,.oracle-vault-page>div{max-width:100%!important}.oracle-memory-page button,.oracle-vault-page button{min-height:40px}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -581,7 +632,10 @@ async function getSupabase(){const c={url:$('authUrl').value.trim(),key:$('authK
 function updateAccountUI(){if(supabaseUser){const name=supabaseUser.user_metadata?.full_name||supabaseUser.user_metadata?.name||supabaseUser.email||'Signed in';$('profileName').textContent=name;$('profileStatus').textContent=supabaseUser.email||'Signed in';$('profileAvatar').textContent=(name[0]||'O').toUpperCase();$('signOutBtn').classList.remove('hidden');setAccountStatus('authStatus','Signed in as '+(supabaseUser.email||name)+'.')}else{$('profileName').textContent=localStorage.getItem('oracleDisplayName')||'Account center';$('profileStatus').textContent='Sign in · Preferences';$('profileAvatar').textContent=(localStorage.getItem('oracleDisplayName')||'O')[0].toUpperCase();$('signOutBtn').classList.add('hidden')}}
 function openAccount(){loadAccountSettings();$('accountOverlay').classList.remove('hidden')}function closeAccount(){$('accountOverlay').classList.add('hidden')}
 $('accountBtn').addEventListener('click',openAccount);$('accountTopBtn').addEventListener('click',openAccount);$('closeAccount').addEventListener('click',closeAccount);$('accountOverlay').addEventListener('click',e=>{if(e.target===$('accountOverlay'))closeAccount()});
-document.querySelectorAll('.settings-tab').forEach(tab=>tab.addEventListener('click',()=>{document.querySelectorAll('.settings-tab').forEach(x=>x.classList.toggle('active',x===tab));const target=$(tab.dataset.settingsTarget);if(target)target.scrollIntoView({behavior:'smooth',block:'start'})}));
+function showAccountSection(id){document.querySelectorAll('.settings-tab').forEach(tab=>{const active=tab.dataset.settingsTarget===id;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active))});document.querySelectorAll('#accountOverlay .account-section').forEach(section=>section.classList.toggle('hidden',section.id!==id));const panel=document.querySelector('#accountOverlay .account-panel');if(panel)panel.scrollTop=0}
+document.querySelectorAll('.settings-tab').forEach(tab=>tab.addEventListener('click',()=>showAccountSection(tab.dataset.settingsTarget)));
+const originalOpenAccount=openAccount;
+openAccount=function(){originalOpenAccount();showAccountSection('account-profile')};
 $('openStorageFromAccount').addEventListener('click',()=>{closeAccount();openStoragePage()});
 $('openMemoryFromAccount').addEventListener('click',()=>{closeAccount();openMemoryPage()});
 $('openVaultFromAccount').addEventListener('click',()=>{closeAccount();openImageVaultPage()});
