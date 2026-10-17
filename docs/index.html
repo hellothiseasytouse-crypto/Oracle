@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111116">
+<meta name="description" content="ORACLE — a personal intelligence workspace.">
+<title>ORACLE — Intelligence Workspace</title>
+<style>
+:root{color-scheme:dark;--bg:#101015;--panel:#17171f;--panel2:#1d1d27;--line:#2c2b39;--text:#f3f1f8;--muted:#a6a2b5;--accent:#b8a8f5;--accent2:#8f7ae0;--user:#29263a;--good:#8ed8b0;--shadow:0 18px 55px #0003}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:14px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea{font:inherit}button{color:inherit;cursor:pointer}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.app{min-height:100vh;display:grid;grid-template-columns:258px minmax(0,1fr)}.sidebar{height:100vh;position:sticky;top:0;background:#14141b;border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:20px}.brand{display:flex;align-items:center;gap:11px;padding:4px 8px 13px}.logo{width:34px;height:34px;border:1px solid #5c527d;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#332c49,#1a1925);color:var(--accent);font-size:18px;font-weight:700}.brand strong{font-size:16px;letter-spacing:.16em}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.11em;margin-top:1px}.new-chat{border:1px solid #51466f;background:#272338;border-radius:11px;padding:11px 12px;display:flex;align-items:center;gap:9px;text-align:left;transition:.2s}.new-chat:hover{background:#332d48}.plus{font-size:20px;color:var(--accent);line-height:1}.nav-label{font-size:10px;color:#817c93;letter-spacing:.15em;text-transform:uppercase;padding:0 10px;margin:0 0 8px}.history{display:flex;flex-direction:column;gap:4px;overflow:auto}.history-item{border:0;background:transparent;color:#c5c1d1;text-align:left;padding:9px 10px;border-radius:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.history-item:hover,.history-item.active{background:#24232f;color:var(--text)}.side-bottom{margin-top:auto;display:grid;gap:7px}.side-link{display:flex;align-items:center;gap:10px;border:0;background:transparent;color:var(--muted);padding:10px;border-radius:9px;text-align:left}.side-link:hover{background:var(--panel2);color:var(--text)}.profile{border-top:1px solid var(--line);padding:15px 7px 0;display:flex;align-items:center;gap:10px}.avatar{width:34px;height:34px;border-radius:50%;background:#302a44;border:1px solid #50456d;color:var(--accent);display:grid;place-items:center;font-weight:700}.profile small{display:block;color:var(--muted);font-size:11px}.main{min-width:0;display:flex;flex-direction:column;min-height:100vh}.topbar{height:62px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;background:#101015ed;backdrop-filter:blur(16px);z-index:3}.top-title{font-weight:600;display:flex;align-items:center;gap:10px}.status-dot{width:7px;height:7px;border-radius:50%;background:#d5b46d;box-shadow:0 0 12px #d5b46d55}.top-actions{display:flex;gap:8px}.icon-btn{width:35px;height:35px;border:1px solid transparent;background:transparent;border-radius:9px;color:var(--muted);display:grid;place-items:center}.icon-btn:hover{background:var(--panel2);color:var(--text);border-color:var(--line)}.icon-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.mobile-menu{display:none}.chat-wrap{width:min(820px,100%);margin:0 auto;padding:46px 26px 24px;flex:1;display:flex;flex-direction:column}.welcome{margin:auto 0 30px;text-align:center;padding:20px 0 12px}.orb{width:68px;height:68px;border-radius:23px;margin:0 auto 22px;display:grid;place-items:center;background:radial-gradient(circle at 35% 25%,#494064,#242031 72%);border:1px solid #5b5078;box-shadow:0 0 55px #a18be51b,inset 0 0 25px #a18be51a;color:#d7cbff;font-size:31px}.eyebrow{font-size:10px;letter-spacing:.23em;color:var(--accent);text-transform:uppercase}.welcome h1{font-size:clamp(28px,4vw,40px);letter-spacing:-.045em;line-height:1.14;margin:11px 0 12px;font-weight:600}.welcome p{color:var(--muted);max-width:470px;margin:0 auto;font-size:14px}.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:30px;text-align:left}.suggestion{background:#17171f;border:1px solid var(--line);border-radius:13px;padding:14px 15px;transition:.18s;min-height:83px}.suggestion:hover{border-color:#716294;background:#1d1b29;transform:translateY(-1px)}.suggestion b{display:block;font-size:12px;margin-bottom:4px;font-weight:600}.suggestion span{color:var(--muted);font-size:12px}.messages{display:flex;flex-direction:column;gap:24px;padding:0 0 28px}.message{display:flex;gap:12px;align-items:flex-start;animation:appear .2s ease}.message.user{flex-direction:row-reverse}.msg-avatar{width:30px;height:30px;flex:0 0 30px;border-radius:10px;display:grid;place-items:center;background:#292438;color:var(--accent);border:1px solid #413853;font-size:13px;font-weight:700}.message.user .msg-avatar{background:#333044;color:#e3dcff}.bubble{max-width:min(690px,calc(100% - 44px));min-width:0;padding:2px 0;color:#e8e5ef;overflow-wrap:anywhere}.message.user .bubble{background:var(--user);border:1px solid #3b354e;border-radius:16px 4px 16px 16px;padding:11px 14px}.bubble p{margin:0 0 12px}.bubble p:last-child{margin-bottom:0}.bubble h1,.bubble h2,.bubble h3{line-height:1.25;margin:19px 0 9px;letter-spacing:-.02em}.bubble h1{font-size:23px}.bubble h2{font-size:19px}.bubble h3{font-size:16px}.bubble ul,.bubble ol{padding-left:23px;margin:8px 0 14px}.bubble li{margin:5px 0}.bubble strong{color:#fff;font-weight:650}.bubble code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#292635;border:1px solid #3b364b;padding:2px 5px;border-radius:5px;font-size:.9em}.bubble pre{background:#111117;border:1px solid var(--line);padding:14px;border-radius:11px;overflow:auto}.bubble pre code{background:none;border:0;padding:0}.bubble blockquote{margin:12px 0;padding:3px 0 3px 13px;border-left:2px solid var(--accent2);color:#c1bbd0}.bubble hr{border:0;border-top:1px solid var(--line);margin:17px 0}.bubble a{color:var(--accent)}.msg-meta{font-size:10px;color:#827d92;margin-top:7px}.notice{border:1px solid #55482d;background:#201d18;color:#d6c39b;border-radius:10px;padding:10px 12px;font-size:12px;margin-bottom:18px}.composer-zone{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 18%);padding:18px 0 10px;margin-top:auto}.composer{background:#191920;border:1px solid #393545;border-radius:17px;padding:12px 12px 10px;box-shadow:var(--shadow);transition:border-color .2s}.composer:focus-within{border-color:#6b5a90}.composer textarea{display:block;width:100%;min-height:48px;max-height:180px;resize:vertical;background:transparent;color:var(--text);border:0;outline:0;padding:4px 5px 9px;line-height:1.5}.composer textarea::placeholder{color:#777287}.compose-tools{display:flex;align-items:center;justify-content:space-between;gap:10px}.tool-group{display:flex;align-items:center;gap:4px}.tool-btn{display:flex;align-items:center;gap:6px;background:transparent;border:0;color:var(--muted);padding:7px 9px;border-radius:8px;font-size:12px}.tool-btn:hover{background:#292733;color:var(--text)}.tool-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.send{height:35px;width:38px;border:0;border-radius:10px;background:var(--accent);color:#171320;display:grid;place-items:center;transition:.18s}.send:hover{background:#d0c4ff;transform:translateY(-1px)}.send:disabled{opacity:.35;cursor:not-allowed;transform:none}.send svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.footnote{text-align:center;color:#777286;font-size:10px;margin-top:11px}.attach-list{display:flex;gap:6px;flex-wrap:wrap;padding:0 4px 8px}.file-chip{border:1px solid var(--line);border-radius:8px;padding:5px 8px;font-size:11px;color:var(--muted)}.hidden{display:none!important}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#282533;border:1px solid #494158;padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);z-index:10;color:var(--text);font-size:12px}.mobile-backdrop{display:none}
+@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:760px){.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:8;left:0;top:0;width:270px;transform:translateX(-105%);transition:transform .22s;box-shadow:var(--shadow)}.sidebar.open{transform:translateX(0)}.mobile-backdrop.show{display:block;position:fixed;inset:0;background:#0009;z-index:7}.mobile-menu{display:grid}.topbar{height:56px;padding:0 13px}.chat-wrap{padding:28px 16px 16px}.welcome{margin:auto 0 25px}.suggestions{grid-template-columns:1fr;margin-top:22px}.suggestion{min-height:70px}.messages{gap:20px}.bubble{max-width:calc(100% - 40px)}.composer-zone{padding-top:12px}.tool-btn{padding:7px}.footnote{font-size:9px}.top-title{font-size:13px}}@media(min-width:761px){.sidebar{transform:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="logo">◒</div><div><strong>ORACLE</strong><small>INTELLIGENCE WORKSPACE</small></div></div>
+  <button class="new-chat" id="newChat"><span class="plus">＋</span><span>New conversation</span></button>
+  <section><div class="nav-label">Workspace</div><div class="history" id="history"><button class="history-item active">New conversation</button></div></section>
+  <div class="side-bottom">
+    <button class="side-link" id="aboutBtn"><span>◈</span> About ORACLE</button>
+    <button class="side-link" id="clearBtn"><span>⌫</span> Clear conversation</button>
+    <div class="profile"><div class="avatar">O</div><div><b>Personal workspace</b><small>Local preview</small></div></div>
+  </div>
+</aside>
+<div class="mobile-backdrop" id="backdrop"></div>
+<main class="main">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:10px"><button class="icon-btn mobile-menu" id="menuBtn" aria-label="Open menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><div class="top-title"><span class="status-dot"></span> ORACLE <span style="color:var(--muted);font-weight:400">/ Workspace</span></div></div>
+    <div class="top-actions"><button class="icon-btn" id="exportBtn" title="Export conversation" aria-label="Export conversation"><svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 17v4h14v-4"/></svg></button><button class="icon-btn" id="infoBtn" title="Connection status" aria-label="Connection status"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg></button></div>
+  </header>
+  <section class="chat-wrap">
+    <div class="notice" id="modeNotice">Preview mode · The interface is live, but no AI backend is connected yet. Your messages stay in this browser.</div>
+    <div class="welcome" id="welcome"><div class="orb">◒</div><div class="eyebrow">Your thinking space</div><h1>What shall we explore?</h1><p>A workspace for questions, ideas, research, and getting things done.</p>
+      <div class="suggestions">
+        <button class="suggestion" data-prompt="Help me turn an idea into a clear, step-by-step plan."><b>✳ Turn an idea into a plan</b><span>Break a big goal into doable steps.</span></button>
+        <button class="suggestion" data-prompt="Explain a difficult topic clearly, with examples and a short summary."><b>⌘ Understand something</b><span>Clear explanations, examples, and context.</span></button>
+        <button class="suggestion" data-prompt="Help me brainstorm unusual, original project ideas. Avoid generic suggestions."><b>◇ Explore new ideas</b><span>Brainstorm, experiment, and create.</span></button>
+        <button class="suggestion" data-prompt="Give me a reusable template for researching a topic and checking sources."><b>↗ Research a topic</b><span>Organize questions and evidence.</span></button>
+      </div>
+    </div>
+    <div class="messages" id="messages" aria-live="polite"></div>
+    <div class="composer-zone">
+      <div class="composer">
+        <div class="attach-list hidden" id="attachList"></div>
+        <textarea id="prompt" rows="2" placeholder="Message ORACLE…" aria-label="Message ORACLE"></textarea>
+        <div class="compose-tools"><div class="tool-group">
+          <button class="tool-btn" id="attachBtn" title="Attach files"><svg viewBox="0 0 24 24"><path d="m20 11.5-8.3 8.3a5 5 0 0 1-7.1-7.1l9.2-9.2a3.5 3.5 0 0 1 5 5l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><span>Attach</span></button>
+          <input id="fileInput" type="file" multiple hidden accept="image/*,.txt,.md,.csv,.pdf,.json"/>
+          <span style="color:#716c80;font-size:10px;padding-left:5px" id="fileHint">Images & files</span>
+        </div><button class="send" id="sendBtn" aria-label="Send message"><svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button></div>
+      </div>
+      <div class="footnote">ORACLE preview · Verify important information independently.</div>
+    </div>
+  </section>
+</main>
+</div>
+<div class="toast hidden" id="toast" role="status"></div>
+<script>
+(()=> {
+const $=id=>document.getElementById(id);
+const prompt=$('prompt'), messages=$('messages'), welcome=$('welcome');
+let attached=[], conversation=[], toastTimer;
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.add('hidden'),2800)}
+function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function inlineMD(s){return escapeHTML(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')}
+function renderMD(raw){
+ const lines=raw.replace(/\r/g,'').split('\n'), out=[];let list=null,code=false,codeLines=[];
+ const closeList=()=>{if(list){out.push('</'+list+'>');list=null}};
+ for(const line of lines){
+  if(line.trim().startsWith('```')){closeList();if(!code){code=true;codeLines=[]}else{out.push('<pre><code>'+escapeHTML(codeLines.join('\n'))+'</code></pre>');code=false}continue}
+  if(code){codeLines.push(line);continue}
+  if(/^\s*---+\s*$/.test(line)){closeList();out.push('<hr>');continue}
+  const h=line.match(/^(#{1,3})\s+(.+)/);if(h){closeList();const n=h[1].length;out.push('<h'+n+'>'+inlineMD(h[2])+'</h'+n+'>');continue}
+  const ul=line.match(/^\s*[-*]\s+(.+)/),ol=line.match(/^\s*\d+[.)]\s+(.+)/);
+  if(ul||ol){const next=ul?'ul':'ol';if(list!==next){closeList();list=next;out.push('<'+list+'>')}out.push('<li>'+inlineMD((ul||ol)[1])+'</li>');continue}
+  closeList();if(!line.trim()){continue}out.push('<p>'+inlineMD(line)+'</p>');
+ }
+ closeList();if(code)out.push('<pre><code>'+escapeHTML(codeLines.join('\n'))+'</code></pre>');return out.join('');
+}
+function addMessage(role,text,meta=''){
+ const row=document.createElement('article');row.className='message '+role;
+ const av=document.createElement('div');av.className='msg-avatar';av.textContent=role==='user'?'Y':'◒';
+ const body=document.createElement('div');body.className='bubble';body.innerHTML=renderMD(text);
+ if(meta){const m=document.createElement('div');m.className='msg-meta';m.textContent=meta;body.appendChild(m)}
+ row.append(av,body);messages.appendChild(row);return row;
+}
+function refreshHistory(title){const b=document.createElement('button');b.className='history-item active';b.textContent=title.slice(0,42);b.title=title;$('history').replaceChildren(b)}
+function send(){
+ const text=prompt.value.trim();if(!text&&!attached.length)return;
+ welcome.classList.add('hidden');$('modeNotice').classList.remove('hidden');
+ const shown=text+(attached.length?'\n\nAttached: '+attached.map(f=>f.name).join(', '):'');
+ addMessage('user',shown);conversation.push({role:'user',content:shown});
+ refreshHistory(text||attached[0]?.name||'Attachment');prompt.value='';prompt.style.height='';attached=[];updateAttachments();
+ addMessage('assistant','**ORACLE is not connected to an AI model yet.**\n\nYour interface is working, but this preview cannot generate a real AI answer. To enable live responses, connect a backend/API endpoint and host it separately from GitHub Pages. Keep any API keys on that server—never place secret keys in this page.','Preview mode');
+ conversation.push({role:'assistant',content:'ORACLE is not connected to an AI model yet.'});
+ messages.scrollIntoView({behavior:'smooth',block:'end'});
+}
+function newChat(){messages.replaceChildren();conversation=[];welcome.classList.remove('hidden');prompt.value='';attached=[];updateAttachments();refreshHistory('New conversation');prompt.focus();if(window.innerWidth<=760)closeMenu()}
+function updateAttachments(){const box=$('attachList');box.replaceChildren();if(!attached.length){box.classList.add('hidden');return}box.classList.remove('hidden');attached.forEach((f,i)=>{const chip=document.createElement('span');chip.className='file-chip';chip.textContent='📎 '+f.name+' ×';chip.title='Remove attachment';chip.style.cursor='pointer';chip.onclick=()=>{attached.splice(i,1);updateAttachments()};box.appendChild(chip)})}
+function closeMenu(){$('sidebar').classList.remove('open');$('backdrop').classList.remove('show')}
+$('sendBtn').addEventListener('click',send);prompt.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});prompt.addEventListener('input',()=>{prompt.style.height='auto';prompt.style.height=Math.min(prompt.scrollHeight,180)+'px'});
+$('newChat').addEventListener('click',newChat);$('clearBtn').addEventListener('click',()=>{if(conversation.length&&!confirm('Clear this conversation?'))return;newChat();toast('Conversation cleared')});
+document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{prompt.value=b.dataset.prompt;prompt.focus();prompt.dispatchEvent(new Event('input'))}));
+$('attachBtn').addEventListener('click',()=>$('fileInput').click());$('fileInput').addEventListener('change',e=>{attached.push(...Array.from(e.target.files));updateAttachments();e.target.value='';if(attached.length)toast(attached.length+' file(s) selected. Preview mode does not upload them.')});
+$('exportBtn').addEventListener('click',()=>{if(!conversation.length){toast('There is no conversation to export yet.');return}const blob=new Blob([conversation.map(m=>(m.role==='user'?'You':'ORACLE')+'\n'+m.content).join('\n\n---\n\n')],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='oracle-conversation.txt';a.click();URL.revokeObjectURL(url);toast('Conversation exported')});
+const info=()=>toast('Preview mode: no AI backend or file-upload service is connected.');$('infoBtn').addEventListener('click',info);$('aboutBtn').addEventListener('click',()=>alert('ORACLE — Intelligence Workspace\n\nThis is the first functional frontend preview. Chat, conversation reset, export, responsive navigation, and message formatting are available. AI generation and file processing require a secure backend connection.'));
+$('menuBtn').addEventListener('click',()=>{$('sidebar').classList.add('open');$('backdrop').classList.add('show')});$('backdrop').addEventListener('click',closeMenu);
+})();
+</script>
+</body>
+</html>
