@@ -864,9 +864,6 @@ loadChats();
 openChat(activeChatId);
 // Permanent public backend endpoint. The secret API key stays on Vercel.
 window.ORACLE_API_URL = 'https://oracle-sepia-one.vercel.app/api/messages';
-// Rename older conversations that have not yet received an AI-generated title.
-void backfillPreviousConversationTitles();
-
 // Set this to the deployed backend URL after deploying the Next.js API, e.g.
 // window.ORACLE_API_URL = 'https://your-oracle-backend.vercel.app/api/messages';
 if(window.ORACLE_API_URL || localStorage.getItem('oracleApiUrl')) {
@@ -903,6 +900,9 @@ $('resetAccount').addEventListener('click',()=>{if(!confirm('Clear saved backend
 (async()=>{try{const c=accountConfig();if(c.url&&c.key){const client=await getSupabase();client.auth.onAuthStateChange((_event,session)=>{supabaseUser=session?.user||null;updateAccountUI()})}}catch{}updateAccountUI()})();
 
 })();
+
+// Rename older conversations that have not yet received an AI-generated title.
+void backfillPreviousConversationTitles();
 </script>
 <style>
 
