@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
   }
 
   // Keep naming keys separate from chat keys, but accept the same safe paste formats.
-  const rawKeyPool = [process.env.ORACLE_NAMING_API_KEYS || "", process.env.ORACLE_NAMING_API_KEY || ""].join("\n");
-  const configuredBaseUrl = process.env.ORACLE_NAMING_API_BASE_URL?.trim();
+  const rawKeyPool = [process.env.ORACLE_NAMING_API_KEYS || "", process.env.ORACLE_NAMING_API_KEY || process.env.ORACLE_API_KEYS || process.env.ORACLE_API_KEY || ""].join("\n");
+  const configuredBaseUrl = (process.env.ORACLE_NAMING_API_BASE_URL || process.env.ORACLE_API_BASE_URL)?.trim();
   const hasGroqKeys = /\bgsk_[A-Za-z0-9_-]+\b/.test(rawKeyPool);
   const baseUrl = (hasGroqKeys && (!configuredBaseUrl || /api\.openai\.com/i.test(configuredBaseUrl))
     ? "https://api.groq.com/openai/v1"
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     const assistantText = typeof body.assistantText === "string" ? body.assistantText.slice(0, 2500).trim() : "";
     if (!userText) return NextResponse.json({ title: null, skipped: true }, { status: 200, headers });
 
-    const model = process.env.ORACLE_NAMING_MODEL || "openai/gpt-oss-20b";
+    const model = process.env.ORACLE_NAMING_MODEL || process.env.ORACLE_MODEL || "openai/gpt-oss-20b";
     let lastError = "";
     for (const key of keys) {
       const response = await fetch(baseUrl + "/chat/completions", {
