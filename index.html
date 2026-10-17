@@ -105,6 +105,15 @@ body.sidebar-collapsed .app{grid-template-columns:0 minmax(0,1fr)}body.sidebar-c
  .history-search{font-size:14px!important;padding:11px!important}
 }
 
+
+/* Response-format engine: compact, consistent visual hierarchy */
+.oracle-inline-icon{background:#211e30;border:1px solid #39324c;border-radius:6px;padding:3px;box-sizing:content-box;color:#d6c9ff}
+.oracle-choice{display:inline-flex;align-items:center;gap:8px;min-height:40px}
+.oracle-choice-icon{width:15px;height:15px;flex:0 0 15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:#c4b5fd}
+.message.assistant[data-response-mode="comparison"] .bubble table{margin-top:12px}
+.message.assistant[data-response-mode="report"] .bubble h2{padding:8px 10px;border:1px solid #302b40;border-radius:9px;background:#15131e}
+.message.assistant[data-response-mode="steps"] .bubble ol{padding-left:27px}
+.message.assistant[data-response-mode="structured"] .bubble h2{display:flex;align-items:center;gap:7px}
 </style>
 <link rel="icon" type="image/svg+xml" href="/Oracle/favicon.svg?v=20261017c">
 <style id="oracle-polish">
@@ -516,6 +525,7 @@ html{scroll-behavior:smooth}body{background:radial-gradient(ellipse at 72% -8%,#
 <button type="button" class="settings-tab" data-settings-target="account-connection"><span>⌁</span> Connections</button>
 <button type="button" class="settings-tab" data-settings-target="account-data"><span>▤</span> Data &amp; privacy</button>
 </nav><div class="account-section" id="account-profile"><h3>Profile &amp; sign in</h3><p class="account-note">Secure sign-in uses Supabase Auth. Add your project details below, then use email magic links or GitHub sign-in.</p><div class="account-grid"><div class="account-field"><label for="authUrl">Supabase project URL</label><input id="authUrl" placeholder="https://your-project.supabase.co" autocomplete="url"></div><div class="account-field"><label for="authKey">Supabase publishable / anon key</label><input id="authKey" placeholder="sb_publishable_… or anon key" autocomplete="off"></div><div class="account-field full"><label for="authEmail">Email address</label><input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email"></div></div><div class="account-actions"><button class="primary" id="emailSignIn">Email me a sign-in link</button><button id="githubSignIn">Continue with GitHub</button><button id="signOutBtn" class="hidden">Sign out</button></div><div class="account-status" id="authStatus" role="status">Not signed in. Authentication needs your own Supabase project.</div><p class="account-note">Use only a publishable/anon key, never a service-role key. Set the site URL and redirect URL to this GitHub Pages site in Supabase Auth settings.</p></div><div class="account-section" id="account-connection"><h3>Connections</h3><p class="account-note">Enter the deployed ORACLE server endpoint. The AI provider key must remain on the server, never in this form.</p><div class="account-field"><label for="backendUrl">Backend messages endpoint</label><input id="backendUrl" placeholder="https://your-oracle-backend.vercel.app/api/messages"></div><div class="account-actions"><button class="primary" id="saveBackend">Save connection</button><button id="testBackend">Test connection</button></div><div class="account-status" id="backendStatus" role="status">No backend connected.</div></div><div class="account-section" id="account-preferences"><h3>Preferences</h3><div class="account-grid"><div class="account-field"><label for="displayName">Display name</label><input id="displayName" placeholder="Your name"></div><div class="account-field"><label>Appearance</label><input value="Dark · Lavender" disabled></div></div><div class="account-actions"><button class="primary" id="saveProfile">Save preferences</button><button id="resetAccount">Clear local settings</button></div><p class="account-note">Preferences are stored in this browser. Conversation history is not yet synced across devices.</p></div><div class="account-section" id="account-data"><h3>Data &amp; privacy</h3><p class="account-note">Your conversations, memories, reminders, and Image Vault are stored locally in this browser unless a separate sync service is configured.</p><div class="account-actions"><button type="button" id="openStorageFromAccount" class="primary">Open Storage &amp; Data</button><button type="button" id="openMemoryFromAccount">Manage memory</button><button type="button" id="openVaultFromAccount">Open Image Vault</button></div><div class="account-status">Local data does not automatically sync between devices. Keep backups somewhere safe and avoid saving passwords or secret keys.</div></div></section></div><div class="toast hidden" id="toast" role="status"></div>
+<script src="./response-format.js?v=20261017a"></script>
 <script>
 (()=> {
 const $=id=>document.getElementById(id);
@@ -683,7 +693,11 @@ async function send(){
    if(!response.ok) throw new Error(data.error || ('AI server returned HTTP '+response.status+'. Check the backend deployment and API key.'));
    const answer=data.reply||data.message||data.output_text||data.choices?.[0]?.message?.content;
    if(!answer) throw new Error('The server responded, but no answer text was returned.');
-   const requestsImages=/\\b(image|images|picture|pictures|photo|photos|wallpaper|artwork|illustration|show me|show|find images|find pictures|look for images|visuals?|ai art|ai-generated|generated art)\\b/i.test(text)||/\\b(mario|flowers?|popp(y|ies)|animals?|birds?|fish|cats?|dogs?|pets?|planets?|galax(y|ies)|constellations?|mushrooms?|trees?|plants?|insects?|dinosaurs?|landmarks?|architecture|outfits?|hairstyles?|flags?|cars?|vehicles?|characters?|logos?|paintings?|art styles?|neurons?|nerves?|brain|heart|lungs?|cells?|bacteria|viruses?|microscopes?|space|nebulae?|black holes?|volcanoes?|mountains?|oceans?|maps?|fossils?|minerals?|crystals?|robots?|computers?|keyboards?|cameras?|food|buildings?|bridges?|ships?|aircraft|trains?|mammals?|reptiles?|amphibians?|spiders?|butterflies|weather|clouds?|storms?|lightning|skeletons?|muscles?|organs?|anatomy|geology|chemistry|physics|math|art|fashion|interiors?|furniture|gardens?|forests?|deserts?|waterfalls?|rivers?|lakes?|stars?|technology|gadgets?|instruments?|sports?|football|soccer|basketball|cricket|games?|video games?)\\b/i.test(text);const displayAnswer=requestsImages?answer.replace(/^\\s*---+\\s*$/gm,'').replace(/\\n{3,}/g,'\\n\\n'):answer;waiting.querySelector('.bubble').innerHTML=renderMD(displayAnswer);const finalBubble=waiting.querySelector('.bubble');if(savedFact){const memoryActivity=addActivityIndicator(finalBubble,'Storing memory');memoryActivity.classList.add('oracle-activity-memory');const statusText=memoryActivity.querySelector('span');setTimeout(()=>{if(!memoryActivity.isConnected)return;statusText.textContent='Memory stored · Completed';memoryActivity.classList.add('is-complete');memoryActivity.querySelector('.oracle-dots')?.remove();},900);}addCodeDownloads(finalBubble,text);addChoiceButtons(answer,finalBubble);
+   const formattedAnswer=window.OracleResponseFormat?.normalize(answer)||String(answer).trim();
+   const responseMode=window.OracleResponseFormat?.classify(text,formattedAnswer)||'conversation';
+   waiting.dataset.responseMode=responseMode;
+   waiting.querySelector('.bubble').innerHTML=renderMD(formattedAnswer);
+   const finalBubble=waiting.querySelector('.bubble');if(savedFact){const memoryActivity=addActivityIndicator(finalBubble,'Storing memory');memoryActivity.classList.add('oracle-activity-memory');const statusText=memoryActivity.querySelector('span');setTimeout(()=>{if(!memoryActivity.isConnected)return;statusText.textContent='Memory stored · Completed';memoryActivity.classList.add('is-complete');memoryActivity.querySelector('.oracle-dots')?.remove();},900);}addCodeDownloads(finalBubble,text);addChoiceButtons(formattedAnswer,finalBubble,text);
    conversation.push({role:'assistant',content:answer});
    // Save and start auto-titling immediately after the AI reply. Optional image/web
    // enhancements must not block conversation naming if they stall or fail.
@@ -699,31 +713,26 @@ async function send(){
 }
 function endpointSafeError(err){return err&&err.message?err.message:'A network error occurred.'}
 function newChat(){saveCurrent();const id=makeId();const chat={id,title:'New conversation',messages:[],updatedAt:Date.now()};chats.unshift(chat);activeChatId=id;conversation=chat.messages;messages.replaceChildren();welcome.classList.remove('hidden');$('modeNotice').classList.remove('hidden');prompt.value='';attached=[];updateAttachments();saveChats();renderHistory();prompt.focus();if(window.innerWidth<=760)closeMenu()}
-function addChoiceButtons(answer,bubble){
- const source=String(answer||'');
- const block=source.match(/\[\[choices\]\]([\s\S]*?)\[\[\/choices\]\]/i);
- const invite=/\b(which would you|which do you|what would you like|choose (one|an option|a direction)|pick (one|an option)|select (one|an option)|your choice|options below|what next|choose|pick one|which option|which format)\b/i.test(source);
- if(!block&&!invite)return;
- const sourceLines=(block?block[1]:source).split(/\r?\n/);
- const options=[];
- for(const line of sourceLines){
-  const clean=line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/,'').replace(/\*\*/g,'').trim();
-  if(!clean||clean.length>90||/^(choose|options|what next|note|example|available choices)\b/i.test(clean))continue;
-  const label=clean.split(/\s+[—–:]\s+/)[0].trim();
-  if(label.length>1&&!options.some(x=>x.toLowerCase()===label.toLowerCase()))options.push(label);
- }
+function addChoiceButtons(answer,bubble,userText=''){
+ const options=window.OracleResponseFormat?.parseChoices(answer)||[];
  if(options.length<2)return;
  const wrap=document.createElement('div');wrap.className='oracle-choice-list';
  const label=document.createElement('div');label.className='oracle-choice-label';label.textContent='Choose an option';wrap.appendChild(label);
- options.slice(0,6).forEach(option=>{const b=document.createElement('button');b.type='button';b.className='oracle-choice';b.textContent=option;b.addEventListener('click',()=>{if(oracleSending)return;prompt.value=option;prompt.dispatchEvent(new Event('input',{bubbles:true}));prompt.focus();void send()});wrap.appendChild(b)});
+ options.slice(0,6).forEach((option,index)=>{
+  const b=document.createElement('button');b.type='button';b.className='oracle-choice';b.setAttribute('data-choice-index',String(index));
+  const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('aria-hidden','true');icon.classList.add('oracle-choice-icon');
+  const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',index===0?'M5 12h14m-6-6 6 6-6 6':'M9 18l6-6-6-6');icon.appendChild(path);
+  const textNode=document.createElement('span');textNode.textContent=option;b.append(icon,textNode);
+  b.addEventListener('click',()=>{if(oracleSending){toast('ORACLE is still replying. Try again in a moment.');return}prompt.value=option;prompt.dispatchEvent(new Event('input',{bubbles:true}));prompt.focus();void send()});
+  wrap.appendChild(b);
+ });
  bubble.appendChild(wrap);
 }
 function addActivityIndicator(container,label){const row=document.createElement('div');row.className='oracle-activity';const kind=String(label||'').toLowerCase();if(/stor|memor|sav/.test(kind))row.classList.add('oracle-activity-storing');else if(/search|find|web/.test(kind))row.classList.add('oracle-activity-searching');else if(/analy|review|inspect|read|process/.test(kind))row.classList.add('oracle-activity-analyzing');else if(/generat|creat|writ|build|draft/.test(kind))row.classList.add('oracle-activity-generating');else if(/think|reason|plan/.test(kind))row.classList.add('oracle-activity-thinking');const text=document.createElement('span');text.textContent=label;const dots=document.createElement('span');dots.className='oracle-dots';dots.setAttribute('aria-label','in progress');dots.innerHTML='<i></i><i></i><i></i>';row.append(text,dots);container.append(row);return row}
 async function maybeShowImages(query,bubble){
  const original=String(query||'').trim();if(!original)return;
- const explicitImage=/\b(image|images|picture|pictures|photo|photos|wallpaper|artwork|illustration|show me|show|find images|find pictures|look for images|visuals?|what does .+ look like|show .+ to me|ai art|ai-generated|generated art)\b/i.test(original);
- const visualTopic=/\b(mario|flowers?|popp(y|ies)|animals?|birds?|fish|cats?|dogs?|pets?|planets?|galax(y|ies)|constellations?|mushrooms?|trees?|plants?|insects?|dinosaurs?|landmarks?|architecture|outfits?|hairstyles?|flags?|cars?|vehicles?|characters?|logos?|paintings?|art styles?|neurons?|nerves?|brain|heart|lungs?|cells?|bacteria|viruses?|microscopes?|space|nebulae?|black holes?|volcanoes?|mountains?|oceans?|maps?|fossils?|minerals?|crystals?|robots?|computers?|keyboards?|cameras?|food|buildings?|bridges?|ships?|aircraft|trains?|historical figures|mammals?|reptiles?|amphibians?|spiders?|butterflies|weather|clouds?|storms?|lightning|hurricanes?|skeletons?|muscles?|organs?|anatomy|geology|chemistry|physics|math|mathematics|art|fashion|interiors?|furniture|gardens?|forests?|deserts?|waterfalls?|rivers?|lakes?|stars?|technology|gadgets?|instruments?|sports?|football|soccer|basketball|cricket|games?|video games?)\b/i.test(original);
- if(!explicitImage&&!visualTopic)return;
+ const explicitImage=window.OracleResponseFormat?.userExplicitlyAskedForImages(original) || /\b(show|find|search for|generate|create|make|give me|display)\b.{0,40}\b(images?|pictures?|photos?|wallpapers?|illustrations?)\b/i.test(original);
+ if(!explicitImage)return;
  const aliases=[
   [/\bmario\b/i,'Mario Nintendo character'],[/\bpopp(y|ies)\b/i,'poppy flower Papaver'],[/\bneurons?\b/i,'neuron nerve cell microscopy'],[/\bbrain\b/i,'human brain anatomy'],[/\bspace\b/i,'outer space astronomy'],[/\bflowers?\b/i,'flower botanical photography'],[/\bcat(s)?\b/i,'domestic cat animal'],[/\bdog(s)?\b/i,'domestic dog animal'],[/\bheart\b/i,'human heart anatomy'],[/\bcell(s)?\b/i,'cell biology microscopy'],[/\bblack holes?\b/i,'black hole astronomy illustration'],[/\bplanets?\b/i,'planet astronomy'],[/\bgalax(y|ies)\b/i,'galaxy astronomy'],[/\bdinosaur(s)?\b/i,'dinosaur fossil reconstruction'],[/\bbutterflies\b/i,'butterfly insect'],[/\bvolcano(es)?\b/i,'volcano geology'],[/\bcrystals?\b/i,'mineral crystal specimen'],[/\barchitecture\b/i,'architecture buildings'],[/\bhairstyles?\b/i,'hairstyle reference'],[/\boutfits?\b/i,'fashion outfit reference'],[/\bflags?\b/i,'national flags']
  ];
