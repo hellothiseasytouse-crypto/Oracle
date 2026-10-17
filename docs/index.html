@@ -199,7 +199,6 @@ async function send(){
  } catch(err) {
    waiting.querySelector('.bubble').innerHTML=renderMD('**ORACLE can’t reach its AI model yet.**\n\n'+endpointSafeError(err)+'\n\nYour attachments are previewed locally; they are only sent to an AI service if you configure a backend endpoint.');
    conversation.push({role:'assistant',content:'ORACLE connection status: '+endpointSafeError(err)});saveCurrent();
- }
  }finally{oracleSending=false;$('sendBtn').disabled=false;$('sendBtn').removeAttribute('aria-busy');$('sendBtn').classList.remove('sending');messages.scrollIntoView({behavior:'smooth',block:'end'});}
 }
 function endpointSafeError(err){return err&&err.message?err.message:'A network error occurred.'}
