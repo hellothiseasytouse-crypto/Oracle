@@ -69,6 +69,15 @@ body.sidebar-collapsed .app{grid-template-columns:0 minmax(0,1fr)}body.sidebar-c
 .nav-action svg,#aboutBtn .about-mark svg{overflow:visible}
 @media(prefers-reduced-motion:reduce){.logo svg{animation:none}#scheduleBtn:hover svg circle{animation:none!important}#scheduleBtn:hover svg path:nth-of-type(1){animation:none}#newChat svg path:last-child{transition:none}}
 
+
+/* Give the conversation history its own large, scrollable area below Storage & Data. */
+.sidebar-scroll{display:flex!important;flex-direction:column!important;overflow:hidden!important;min-height:0!important}
+.sidebar-scroll>.recents-section{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;min-height:180px!important;margin-bottom:0!important}
+.sidebar-scroll>.recents-section>.history{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;min-height:120px!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;padding:2px 3px 8px!important}
+.sidebar-scroll>.recents-section>.history-empty{flex:0 0 auto}
+.sidebar-scroll>.pinned-section,.sidebar-scroll>section:not(.recents-section){flex:0 0 auto}
+@media(max-height:650px){.sidebar-scroll>.recents-section{min-height:120px!important}.sidebar-scroll>.recents-section>.history{min-height:80px!important}}
+
 </style>
 <link rel="icon" type="image/svg+xml" href="/Oracle/favicon.svg?v=20261017c">
 <style id="oracle-polish">
