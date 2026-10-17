@@ -586,7 +586,8 @@ async function requestAIConversationTitle(messagesEndpoint,userText,assistantTex
 
 async function send(){
  if(oracleSending)return;
- const text=prompt.value.trim();if(!text&&!attached.length){prompt.focus();return;}\n const requestChatId=activeChatId;
+ const text=prompt.value.trim();if(!text&&!attached.length){prompt.focus();return;}
+ const requestChatId=activeChatId;
  oracleSending=true;$('sendBtn').disabled=true;$('sendBtn').setAttribute('aria-busy','true');$('sendBtn').classList.add('sending');
  const filesNow=[...attached];
  const imagePreviews=filesNow.filter(f=>f.type.startsWith('image/')).map(f=>URL.createObjectURL(f));
@@ -627,7 +628,9 @@ async function send(){
    conversation.push({role:'assistant',content:answer});
    await maybeShowImages(text,waiting.querySelector('.bubble'));
    await maybeSearchWeb(text,waiting.querySelector('.bubble'),webPages);
-   saveCurrent();\n   void requestAIConversationTitle(endpoint,text||shown,answer,requestChatId);\n   if(readAloud&&'speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(answer.replace(/[#*\x60>]/g,'')))}
+   saveCurrent();
+   void requestAIConversationTitle(endpoint,text||shown,answer,requestChatId);
+   if(readAloud&&'speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(answer.replace(/[#*\x60>]/g,'')))}
  } catch(err) {
    waiting.querySelector('.bubble').innerHTML=renderMD('**ORACLE can’t reach its AI model yet.**\n\n'+endpointSafeError(err)+'\n\nThe request failed before ORACLE could finish processing it. If you attached a file, check the backend error above and try again after the server update is deployed.');
    conversation.push({role:'assistant',content:'ORACLE connection status: '+endpointSafeError(err)});saveCurrent();
