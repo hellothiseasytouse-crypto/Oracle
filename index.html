@@ -180,7 +180,8 @@ async function send(){
      }
      return item;
    }));
-   const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:conversation,attachments,memory:memoryContext()})});
+   const requestHeaders={'Content-Type':'application/json'};if(supabaseClient){try{const {data:{session}}=await supabaseClient.auth.getSession();if(session?.access_token)requestHeaders.Authorization='Bearer '+session.access_token}catch{}}
+   const response=await fetch(endpoint,{method:'POST',headers:requestHeaders,body:JSON.stringify({messages:conversation,attachments,memory:memoryContext()})});
    const data=await response.json().catch(()=>({}));
    if(!response.ok) throw new Error(data.error || ('AI server returned HTTP '+response.status+'. Check the backend deployment and API key.'));
    const answer=data.reply||data.message||data.output_text||data.choices?.[0]?.message?.content;
