@@ -56,12 +56,12 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Keys are configured as a comma- or newline-separated list. The legacy single key
-  // remains supported, and the list length is never hard-coded.
-  const apiKeys = [...new Set([
-    ...(process.env.ORACLE_API_KEYS || "").split(/[,;\s]+/),
-    process.env.ORACLE_API_KEY || "",
-  ].map(key => key.trim()).filter(Boolean))];
+  // Parse key pools defensively: users may paste one key per line, comma/semicolon
+  // separated keys, quoted keys, or numbered lists. Groq keys are extracted by their
+  // known prefix so labels, numbering, and punctuation cannot corrupt them.
+  const baseUrl = (process.env.ORACLE_API_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
+  const rawKeyPool = [process.env.ORACLE_API_KEYS || "", process.env.ORACLE_API_KEY || ""].join("\n");
+  const apiKeys = parseApiKeys(rawKeyPool, baseUrl);
   if (!apiKeys.length) {
     return NextResponse.json(
       { error: "The AI backend is deployed, but no ORACLE_API_KEYS / ORACLE_API_KEY values are configured on the server." },
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
     let upstream: Response | null = null;
     let activeApiKey = apiKeys[0];
     let data: any = {};
-    let lastProviderError = "No configured API key could complete the request.";
+    let lastProviderError = "No configured API key could complete the request.";\n    let lastProviderStatus = 0;
     // Try keys in configured order. Quota/rate-limit/auth failures are key-specific;
     // do not change the loading/thinking UI on the client while this loop runs.
     for (const apiKey of apiKeys) {
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
       data = candidateData;
     }
     if (!upstream) {
-      return NextResponse.json({ error: lastProviderError }, { status: 503, headers });
+      return NextResponse.json({ error: `All ${apiKeys.length} configured API key(s) were tried. Last provider response: ${lastProviderError}`, code: "API_KEY_POOL_REJECTED", attemptedKeys: apiKeys.length, providerStatus: lastProviderStatus || undefined }, { status: 503, headers });
     }
     // `data` is the response from the first key that succeeded, or the last failure.
     if (!upstream.ok) {
