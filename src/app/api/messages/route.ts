@@ -104,6 +104,9 @@ export async function POST(request: NextRequest) {
       role: "system",
       content: [
         "You are ORACLE, a helpful, capable AI assistant.",
+        "Accuracy comes before sounding confident. Never invent facts, quotations, song lyrics, sources, URLs, or search results. If a request is ambiguous, ask one short clarifying question instead of guessing. If you are unsure, say so plainly and give the best verified answer you can.",
+        "For factual questions about specific people, artists, songs, products, technical details, recent events, or other niche facts, use the available browser_search tool to verify details when possible, even if the user did not explicitly say 'search the web'. Clearly separate verified facts from uncertainty and cite/link sources returned by search when available.",
+        "Music and lyrics: bbno$ (often typed as 'Baby No Money') is an artist name, not a song title. If someone asks for 'Baby No Money lyrics' without identifying a specific track, clarify which bbno$ song they mean rather than inventing lyrics. Do not provide or reconstruct full copyrighted song lyrics; briefly explain and offer a summary, meaning/analysis, a short excerpt, or a link to a legitimate lyrics source. Never substitute made-up lyrics for the real song.",
         "Write clearly in Markdown, like a polished conversational assistant.",
         "Be direct and concise. Match the size of the answer to the request; do not turn a tiny request into a long tutorial.",
         "When the user asks for a simple downloadable artifact (for example, a timer page or a small HTML file), provide a single minimal, complete code block with the correct language and no long explanation, fake download links, or instructions to manually copy the code. The website adds a real download button for that code block.",
@@ -177,8 +180,12 @@ export async function POST(request: NextRequest) {
       typeof file.data === "string" && file.data.startsWith("data:image/")
     );
     const lastUserText = [...validMessages].reverse().find(item => item.role === "user")?.content || "";
-    const isWebSearchRequest = /\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/i.test(lastUserText);
-    // Use currently supported Groq models: Qwen 3.8 for vision, GPT-OSS 120B with browser_search for web requests.
+    const explicitlyRequestsSearch = /\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/i.test(lastUserText);
+    const asksForSpecificMusicFacts = /\b(lyrics?|song|track|album|discography|artist|singer|who sings|released|release date|music video|bbno\$|baby no money)\b/i.test(lastUserText)
+      && !/\b(write|compose|make|create|generate)\b.{0,30}\b(song|lyrics|music)\b/i.test(lastUserText);
+    const asksForTimeSensitiveOrPreciseFacts = /\b(latest|current|today|right now|this week|price of|release date|version number|official source|is .{1,50} still|who is|what year did|when did .{1,60} release)\b/i.test(lastUserText);
+    const isWebSearchRequest = explicitlyRequestsSearch || asksForSpecificMusicFacts || asksForTimeSensitiveOrPreciseFacts;
+    // Use the strongest configured text model and ground music/niche/current facts with search when supported.
     const isGroq = /groq\.com/i.test(baseUrl);
     const model = isGroq && hasImageAttachments
       ? "qwen/qwen3.8-27b"
@@ -206,7 +213,7 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           model,
           messages: providerMessages,
-          temperature: 0.7,
+          temperature: 0.4,
           max_tokens: 2048,
           ...(useBrowserSearch ? { tools: [{ type: "browser_search" }], tool_choice: "required" } : {}),
         }),
