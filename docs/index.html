@@ -247,7 +247,7 @@ async function send(){
    if(!response.ok) throw new Error(data.error || ('AI server returned HTTP '+response.status+'. Check the backend deployment and API key.'));
    const answer=data.reply||data.message||data.output_text||data.choices?.[0]?.message?.content;
    if(!answer) throw new Error('The server responded, but no answer text was returned.');
-   const requestsImages=/\\b(image|images|picture|pictures|photo|photos|wallpaper|artwork|illustration|show me|show|find images|find pictures|look for images|ai art|ai-generated|generated art)\\b/i.test(text)||/\\b(mario|flowers?|popp(y|ies)|animals?|birds?|planets?|galax(y|ies)|constellations?|mushrooms?|trees?|insects?|dinosaurs?|landmarks?|architecture|outfits?|hairstyles?|flags?|cars?|characters?|logos?|paintings?|art styles?|neurons?|nerves?|brain|heart|lungs?)\\b/i.test(text);const displayAnswer=requestsImages?answer.replace(/^\\s*---+\\s*$/gm,'').replace(/\\n{3,}/g,'\\n\\n'):answer;waiting.querySelector('.bubble').innerHTML=renderMD(displayAnswer);const finalBubble=waiting.querySelector('.bubble');if(savedFact){const memoryActivity=addActivityIndicator(finalBubble,'Storing memory');memoryActivity.classList.add('oracle-activity-memory');const statusText=memoryActivity.querySelector('span');setTimeout(()=>{if(!memoryActivity.isConnected)return;statusText.textContent='Memory stored · Completed';memoryActivity.classList.add('is-complete');memoryActivity.querySelector('.oracle-dots')?.remove();},900);}addCodeDownloads(finalBubble,text);addChoiceButtons(answer,finalBubble);
+   const requestsImages=/\\b(image|images|picture|pictures|photo|photos|wallpaper|artwork|illustration|show me|show|find images|find pictures|look for images|visuals?|ai art|ai-generated|generated art)\\b/i.test(text)||/\\b(mario|flowers?|popp(y|ies)|animals?|birds?|fish|cats?|dogs?|pets?|planets?|galax(y|ies)|constellations?|mushrooms?|trees?|plants?|insects?|dinosaurs?|landmarks?|architecture|outfits?|hairstyles?|flags?|cars?|vehicles?|characters?|logos?|paintings?|art styles?|neurons?|nerves?|brain|heart|lungs?|cells?|bacteria|viruses?|microscopes?|space|nebulae?|black holes?|volcanoes?|mountains?|oceans?|maps?|fossils?|minerals?|crystals?|robots?|computers?|keyboards?|cameras?|food|buildings?|bridges?|ships?|aircraft|trains?|mammals?|reptiles?|amphibians?|spiders?|butterflies|weather|clouds?|storms?|lightning|skeletons?|muscles?|organs?|anatomy|geology|chemistry|physics|math|art|fashion|interiors?|furniture|gardens?|forests?|deserts?|waterfalls?|rivers?|lakes?|stars?|technology|gadgets?|instruments?|sports?|football|soccer|basketball|cricket|games?|video games?)\\b/i.test(text);const displayAnswer=requestsImages?answer.replace(/^\\s*---+\\s*$/gm,'').replace(/\\n{3,}/g,'\\n\\n'):answer;waiting.querySelector('.bubble').innerHTML=renderMD(displayAnswer);const finalBubble=waiting.querySelector('.bubble');if(savedFact){const memoryActivity=addActivityIndicator(finalBubble,'Storing memory');memoryActivity.classList.add('oracle-activity-memory');const statusText=memoryActivity.querySelector('span');setTimeout(()=>{if(!memoryActivity.isConnected)return;statusText.textContent='Memory stored · Completed';memoryActivity.classList.add('is-complete');memoryActivity.querySelector('.oracle-dots')?.remove();},900);}addCodeDownloads(finalBubble,text);addChoiceButtons(answer,finalBubble);
    conversation.push({role:'assistant',content:answer});
    await maybeShowImages(text,waiting.querySelector('.bubble'));
    await maybeSearchWeb(text,waiting.querySelector('.bubble'),webPages);
@@ -281,31 +281,69 @@ function addChoiceButtons(answer,bubble){
 function addActivityIndicator(container,label){const row=document.createElement('div');row.className='oracle-activity';const kind=String(label||'').toLowerCase();if(/stor|memor|sav/.test(kind))row.classList.add('oracle-activity-storing');else if(/search|find|web/.test(kind))row.classList.add('oracle-activity-searching');else if(/analy|review|inspect|read|process/.test(kind))row.classList.add('oracle-activity-analyzing');else if(/generat|creat|writ|build|draft/.test(kind))row.classList.add('oracle-activity-generating');else if(/think|reason|plan/.test(kind))row.classList.add('oracle-activity-thinking');const text=document.createElement('span');text.textContent=label;const dots=document.createElement('span');dots.className='oracle-dots';dots.setAttribute('aria-label','in progress');dots.innerHTML='<i></i><i></i><i></i>';row.append(text,dots);container.append(row);return row}
 async function maybeShowImages(query,bubble){
  const original=String(query||'').trim();if(!original)return;
- const explicitImage=/\b(image|images|picture|pictures|photo|photos|wallpaper|artwork|illustration|show me|show|find images|find pictures|look for images|ai art|ai-generated|generated art)\b/i.test(original);
- const visualTopic=/\b(mario|flowers?|popp(y|ies)|animals?|birds?|planets?|galax(y|ies)|constellations?|mushrooms?|trees?|insects?|dinosaurs?|landmarks?|architecture|outfits?|hairstyles?|flags?|cars?|characters?|logos?|paintings?|art styles?|neurons?|nerves?|brain|heart|lungs?)\b/i.test(original);
+ const explicitImage=/\b(image|images|picture|pictures|photo|photos|wallpaper|artwork|illustration|show me|show|find images|find pictures|look for images|visuals?|what does .+ look like|show .+ to me|ai art|ai-generated|generated art)\b/i.test(original);
+ const visualTopic=/\b(mario|flowers?|popp(y|ies)|animals?|birds?|fish|cats?|dogs?|pets?|planets?|galax(y|ies)|constellations?|mushrooms?|trees?|plants?|insects?|dinosaurs?|landmarks?|architecture|outfits?|hairstyles?|flags?|cars?|vehicles?|characters?|logos?|paintings?|art styles?|neurons?|nerves?|brain|heart|lungs?|cells?|bacteria|viruses?|microscopes?|space|nebulae?|black holes?|volcanoes?|mountains?|oceans?|maps?|fossils?|minerals?|crystals?|robots?|computers?|keyboards?|cameras?|food|recipes?|buildings?|bridges?|ships?|aircraft|trains?|historical figures|mammals?|reptiles?|amphibians?|spiders?|butterflies|weather|clouds?|storms?|lightning|hurricanes?|skeletons?|muscles?|organs?|anatomy|geology|chemistry|physics|math|mathematics|art|fashion|interiors?|furniture|gardens?|forests?|deserts?|waterfalls?|rivers?|lakes?|planets?|moons?|stars?|galaxies|technology|gadgets?|instruments?|sports?|football|soccer|basketball|cricket|games?|video games?)\b/i.test(original);
  if(!explicitImage&&!visualTopic)return;
- let term=original.replace(/\b(show me|show|find|search for|search|images? of|pictures? of|photos? of|picture of|pic of|image of|photo of|from (the )?web|please|can you|could you|give me|a pic|a picture|display|look up|on the internet|from the internet|ai-generated|ai generated|ai art)\b/ig,' ').replace(/[?!.,]/g,' ').replace(/\s+/g,' ').trim();
- if(/\bmario\b/i.test(original))term='Mario Nintendo character';
- else if(/\bpopp(y|ies)\b/i.test(original))term='Poppy flower Papaver';
- else if(/\bneurons?\b/i.test(original))term='Neuron biology';
- else if(/\bbrain\b/i.test(original))term='Human brain anatomy';
- if(!term)term=original;
+ const aliases=[
+  [/\bmario\b/i,'Mario Nintendo character'],
+  [/\bpopp(y|ies)\b/i,'poppy flower Papaver'],
+  [/\bneurons?\b/i,'neuron nerve cell microscopy'],
+  [/\bbrain\b/i,'human brain anatomy'],
+  [/\bspace\b/i,'outer space astronomy'],
+  [/\bai[- ]?generated art\b|\bai art\b/i,'digital art illustration'],
+  [/\bflowers?\b/i,'flower botanical photography'],
+  [/\bcat(s)?\b/i,'domestic cat animal'],
+  [/\bdog(s)?\b/i,'domestic dog animal'],
+  [/\bheart\b/i,'human heart anatomy'],
+  [/\bcell(s)?\b/i,'cell biology microscopy'],
+  [/\bblack holes?\b/i,'black hole astronomy illustration'],
+  [/\bplanets?\b/i,'planet astronomy'],
+  [/\bgalax(y|ies)\b/i,'galaxy astronomy'],
+  [/\bdinosaur(s)?\b/i,'dinosaur fossil reconstruction'],
+  [/\bbutterflies\b/i,'butterfly insect'],
+  [/\bvolcano(es)?\b/i,'volcano geology'],
+  [/\bcrystals?\b/i,'mineral crystal specimen'],
+  [/\barchitecture\b/i,'architecture buildings'],
+  [/\bhairstyles?\b/i,'hairstyle reference'],
+  [/\boutfits?\b/i,'fashion outfit reference'],
+  [/\bflags?\b/i,'national flags']
+ ];
+ let term=original.replace(/\b(show me|show|find|search for|search|images? of|pictures? of|photos? of|picture of|pic of|image of|photo of|from (the )?web|please|can you|could you|give me|a pic|a picture|display|look up|on the internet|from the internet|ai-generated|ai generated|ai art|what does|what do|look like|to me)\b/ig,' ').replace(/[?!.,]/g,' ').replace(/\s+/g,' ').trim();
+ for(const [pattern,expanded] of aliases){if(pattern.test(original)){term=expanded+' '+term.replace(pattern,'').trim();break}}
+ term=term.replace(/\s+/g,' ').trim()||original;
  const heading=document.createElement('p');heading.className='image-results-label';heading.textContent='Images from the web';bubble.appendChild(heading);
  const grid=document.createElement('div');grid.className='image-results';bubble.appendChild(grid);
- const loading=addActivityIndicator(grid,'Finding matching images');
+ const loading=addActivityIndicator(grid,'Searching image collections');
+ const storageKey='oracleSeenImageResults.v1';
+ let seen=[];try{seen=JSON.parse(localStorage.getItem(storageKey)||'[]');if(!Array.isArray(seen))seen=[]}catch{seen=[]}
+ const remember=id=>{seen=[...seen.filter(x=>x!==id),id].slice(-300);try{localStorage.setItem(storageKey,JSON.stringify(seen))}catch{}};
  try{
-  const searchTerm=/\bai|generated|artwork|illustration|wallpaper\b/i.test(original)?term+' AI art':term;
-  const url='https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(searchTerm)+'&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url%7Cextmetadata&iiurlwidth=640&format=json&origin=*';
-  const res=await fetch(url);if(!res.ok)throw new Error('image search unavailable');const data=await res.json();
-  const pages=Object.values(data.query?.pages||{}).filter(p=>p.title&&p.imageinfo?.[0]?.thumburl&&/^image\//i.test(p.imageinfo[0].mime||'image/')).map(p=>{
-   const info=p.imageinfo[0],meta=info.extmetadata||{};
-   const clean=v=>String(v?.value||'').replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&#0*39;/g,"'").replace(/\s+/g,' ').trim();
-   return {title:p.title.replace(/^File:/,''),source:info.thumburl,link:info.descriptionurl||('https://commons.wikimedia.org/wiki/'+encodeURIComponent(p.title.replace(/ /g,'_'))),extract:clean(meta.ImageDescription)||clean(meta.Artist)||'Open the source for image details',license:clean(meta.LicenseShortName)||'License details on source page'};
-  }).slice(0,6);
+  const searchTerms=[term,term+' photograph',term+' illustration'].filter((v,i,a)=>a.indexOf(v)===i).slice(0,2);
+  const batches=await Promise.all(searchTerms.map(async searchTerm=>{
+   const url='https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(searchTerm)+'&gsrnamespace=6&gsrlimit=30&gsrinfo=totalhits&prop=imageinfo&iiprop=url%7Cextmetadata%7CMimeType&iiurlwidth=640&format=json&origin=*';
+   const res=await fetch(url);if(!res.ok)throw new Error('image search unavailable');const data=await res.json();
+   return Object.values(data.query?.pages||{}).filter(p=>p.title&&p.imageinfo?.[0]?.thumburl&&/^image\//i.test(p.imageinfo[0].mime||'image/')).map(p=>{
+    const info=p.imageinfo[0],meta=info.extmetadata||{};
+    const clean=v=>String(v?.value||'').replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&#0*39;/g,"'").replace(/\s+/g,' ').trim();
+    return {id:String(p.pageid||p.title),title:p.title.replace(/^File:/,''),source:info.thumburl,link:info.descriptionurl||('https://commons.wikimedia.org/wiki/'+encodeURIComponent(p.title.replace(/ /g,'_'))),extract:clean(meta.ImageDescription)||clean(meta.Artist)||'Open the source for image details',license:clean(meta.LicenseShortName)||'License details on source page'};
+   });
+  }));
+  const unique=new Map();for(const p of batches.flat())if(!unique.has(p.id))unique.set(p.id,p);
+  let all=[...unique.values()];
+  // Shuffle matching candidates, prioritize unseen images, and avoid repeating recent results across chats.
+  all.sort(()=>Math.random()-.5);
+  let fresh=all.filter(p=>!seen.includes(p.id));
+  if(fresh.length<4){seen=seen.slice(-80);fresh=all.filter(p=>!seen.includes(p.id))}
+  const pages=fresh.slice(0,8);
   loading.remove();
-  if(!pages.length){heading.textContent='No matching images found';const note=document.createElement('small');note.className='image-search-note';note.textContent='Try a more specific search. Results depend on what the public image archive contains.';grid.append(note);return}
-  for(const p of pages){const card=document.createElement('a');card.className='image-result';card.href=p.link;card.target='_blank';card.rel='noopener noreferrer';const img=document.createElement('img');img.loading='lazy';img.src=p.source;img.alt=p.title;img.referrerPolicy='no-referrer';img.onerror=()=>{card.remove()};const copy=document.createElement('span');copy.className='image-result-copy';const title=document.createElement('strong');title.textContent=p.title;const desc=document.createElement('small');desc.textContent=p.extract.slice(0,125);const source=document.createElement('small');source.className='image-result-source';source.textContent=p.license+' · Wikimedia Commons';copy.append(title,desc,source);card.append(img,copy);grid.append(card)}
- }catch{loading.remove();grid.remove();heading.textContent='Could not load images right now';const note=document.createElement('small');note.className='image-search-note';note.textContent='The image source did not respond. Please try again later.';bubble.appendChild(note)}
+  if(!pages.length){heading.textContent='No new matching images found';const note=document.createElement('small');note.className='image-search-note';note.textContent='Try a more specific keyword. ORACLE remembers recently shown results in this browser to reduce repeats.';grid.append(note);return}
+  for(const p of pages){
+   remember(p.id);
+   const card=document.createElement('a');card.className='image-result';card.href=p.link;card.target='_blank';card.rel='noopener noreferrer';
+   const img=document.createElement('img');img.loading='lazy';img.src=p.source;img.alt=p.title;img.referrerPolicy='no-referrer';img.onerror=()=>{card.remove();if(!grid.querySelector('.image-result')){const note=document.createElement('small');note.className='image-search-note';note.textContent='Some source images could not load. Open another result or try different keywords.';grid.append(note)}};
+   const copy=document.createElement('span');copy.className='image-result-copy';const title=document.createElement('strong');title.textContent=p.title;const desc=document.createElement('small');desc.textContent=p.extract.slice(0,125);const source=document.createElement('small');source.className='image-result-source';source.textContent=p.license+' · Wikimedia Commons';copy.append(title,desc,source);card.append(img,copy);grid.append(card)
+  }
+ }catch{loading.remove();grid.remove();heading.textContent='Could not load images right now';const note=document.createElement('small');note.className='image-search-note';note.textContent='The public image collection did not respond. Try again later or use more specific keywords.';bubble.appendChild(note)}
 }
 async function getWebSearchResults(query){
  const q=String(query||'').replace(/\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/ig,' ').trim();
