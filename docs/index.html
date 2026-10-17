@@ -200,8 +200,7 @@ async function send(){
    waiting.querySelector('.bubble').innerHTML=renderMD('**ORACLE can’t reach its AI model yet.**\n\n'+endpointSafeError(err)+'\n\nYour attachments are previewed locally; they are only sent to an AI service if you configure a backend endpoint.');
    conversation.push({role:'assistant',content:'ORACLE connection status: '+endpointSafeError(err)});saveCurrent();
  }
- messages.scrollIntoView({behavior:'smooth',block:'end'});
- }finally{oracleSending=false;$('sendBtn').disabled=false;$('sendBtn').removeAttribute('aria-busy');$('sendBtn').classList.remove('sending');}
+ }finally{oracleSending=false;$('sendBtn').disabled=false;$('sendBtn').removeAttribute('aria-busy');$('sendBtn').classList.remove('sending');messages.scrollIntoView({behavior:'smooth',block:'end'});}
 }
 function endpointSafeError(err){return err&&err.message?err.message:'A network error occurred.'}
 function newChat(){saveCurrent();const id=makeId();const chat={id,title:'New conversation',messages:[],updatedAt:Date.now()};chats.unshift(chat);activeChatId=id;conversation=chat.messages;messages.replaceChildren();welcome.classList.remove('hidden');$('modeNotice').classList.remove('hidden');prompt.value='';attached=[];updateAttachments();saveChats();renderHistory();prompt.focus();if(window.innerWidth<=760)closeMenu()}
