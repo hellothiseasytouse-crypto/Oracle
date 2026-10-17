@@ -88,10 +88,19 @@ export async function POST(request: NextRequest) {
       ].join("\n"),
     }];
 
-    for (const item of messages) {
-      if (!item || (item.role !== "user" && item.role !== "assistant") || typeof item.content !== "string") continue;
-      const content = item.content.slice(0, 30000);
+    // Keep the complete chat in the browser, but send a bounded recent window to the model.
+    // This avoids context-window / request-size errors as a conversation grows.
+    const validMessages = messages.filter((item): item is IncomingMessage =>
+      !!item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string"
+    );
+    const recentMessages = validMessages.slice(-14);
+    let budget = 24000;
+    for (const item of recentMessages) {
+      if (budget <= 0) break;
+      const content = item.content.slice(-Math.min(5000, budget));
+      if (!content.trim()) continue;
       providerMessages.push({ role: item.role, content });
+      budget -= content.length;
     }
 
     if (attachments.length) {
@@ -141,13 +150,34 @@ export async function POST(request: NextRequest) {
         model,
         messages: providerMessages,
         temperature: 0.7,
+        max_tokens: 2048,
       }),
       signal: AbortSignal.timeout(60000),
     });
 
-    const data = await upstream.json().catch(() => ({}));
+    let data = await upstream.json().catch(() => ({}));
     if (!upstream.ok) {
       const message = typeof data?.error?.message === "string" ? data.error.message : "The AI provider rejected the request.";
+      const oversized = upstream.status === 400 && /context.?length|too many tokens|request too large|input.{0,20}too long|maximum context/i.test(message);
+      if (oversized) {
+        const compactMessages = [providerMessages[0], ...validMessages.slice(-6).map(item => ({
+          role: item.role,
+          content: item.content.slice(-1800),
+        }))];
+        const retry = await fetch(baseUrl + "/chat/completions", {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
+          body: JSON.stringify({ model, messages: compactMessages, temperature: 0.7, max_tokens: 1200 }),
+          signal: AbortSignal.timeout(60000),
+        });
+        data = await retry.json().catch(() => ({}));
+        if (retry.ok) {
+          const retryReply = data?.choices?.[0]?.message?.content;
+          if (typeof retryReply === "string" && retryReply.trim()) return NextResponse.json({ reply: retryReply }, { headers });
+        }
+        const retryMessage = typeof data?.error?.message === "string" ? data.error.message : "The request was too large even after reducing the chat context. Start a new conversation or shorten the latest message.";
+        return NextResponse.json({ error: retryMessage }, { status: retry.status === 429 ? 429 : 502, headers });
+      }
       return NextResponse.json({ error: message }, { status: upstream.status === 429 ? 429 : 502, headers });
     }
 
