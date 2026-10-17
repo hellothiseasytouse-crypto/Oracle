@@ -106,7 +106,9 @@ export async function POST(request: NextRequest) {
     }
 
     const baseUrl = (process.env.ORACLE_API_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
-    const model = process.env.ORACLE_MODEL || "gpt-4o-mini";
+    const configuredModel = process.env.ORACLE_MODEL || "openai/gpt-oss-120b";
+    // Groq deprecated llama-3.3-70b-versatile for developer-tier usage; migrate old Vercel settings automatically.
+    const model = configuredModel === "llama-3.3-70b-versatile" ? "openai/gpt-oss-120b" : configuredModel;
     const upstream = await fetch(baseUrl + "/chat/completions", {
       method: "POST",
       headers: {
