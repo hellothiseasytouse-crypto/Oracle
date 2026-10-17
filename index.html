@@ -237,6 +237,64 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline-offset:2
 .oracle-memory-page [data-memory-item],.oracle-vault-page .vault-card{border-color:#302d40!important}
 @media(max-width:540px){.oracle-memory-page>div,.oracle-vault-page>div{max-width:100%!important}.oracle-memory-page button,.oracle-vault-page button{min-height:40px}}
 </style>
+<style id="oracle-schedule-memory-premium">
+/* Premium pass: scheduling + memory */
+.oracle-page{background:radial-gradient(ellipse at 12% 0%,#48356d55,transparent 38%),radial-gradient(ellipse at 92% 18%,#183c5940,transparent 34%),#090a10!important}
+.oracle-page-shell{max-width:1040px!important}
+.oracle-page-head{padding:5px 0 24px!important;margin-bottom:24px!important;border-bottom:1px solid #292737!important}
+.oracle-page-kicker{display:inline-flex!important;align-items:center;gap:8px;padding:7px 10px!important;border:1px solid #494064!important;border-radius:999px!important;background:#211b32!important;letter-spacing:2px!important;font-size:10px!important}
+.oracle-page h1{font-size:clamp(36px,5vw,54px)!important;font-weight:720!important;letter-spacing:-2.2px!important;margin:13px 0 8px!important}
+.oracle-page-head .muted{font-size:14px!important;line-height:1.65!important}
+.oracle-page-head button{border-radius:12px!important;padding:11px 15px!important;background:#171620!important;border-color:#454056!important}
+.oracle-page .page-card{border-color:#373247!important;background:linear-gradient(145deg,#1a1825f2,#111119f5)!important;border-radius:18px!important;box-shadow:0 18px 48px #0002,inset 0 1px #ffffff08!important}
+.oracle-page .page-card strong{font-size:14px!important}
+.oracle-page .page-card p{font-size:12px!important;line-height:1.7!important}
+.oracle-page .schedule-compose{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(220px,260px) auto!important;align-items:center!important;gap:12px!important;padding:18px!important;border-color:#4b4164!important;background:linear-gradient(115deg,#211b31,#15141f 65%,#10151d)!important}
+.oracle-page .schedule-compose input{width:100%!important;min-width:0!important;min-height:48px!important;box-sizing:border-box!important;padding:13px 14px!important;border:1px solid #403a53!important;border-radius:12px!important;background:#0b0b12!important;color:#f6f2ff!important;font:inherit!important;font-size:13px!important}
+.oracle-page .schedule-compose input:focus{outline:none!important;border-color:#a995f0!important;box-shadow:0 0 0 3px #a995f01b!important}
+.oracle-page .schedule-compose input::placeholder{color:#77758a!important}
+.oracle-page .schedule-compose button{min-height:48px!important;white-space:nowrap!important;border-radius:12px!important;padding:12px 16px!important;box-shadow:0 7px 24px #a995f025!important}
+.oracle-page h2{font-size:19px!important;letter-spacing:-.4px!important;margin:28px 0 14px!important}
+.oracle-page .page-list{gap:11px!important;margin-top:0!important}
+.oracle-page .page-row{min-height:72px!important;box-sizing:border-box!important;padding:16px 18px!important;border:1px solid #302d40!important;border-radius:15px!important;background:linear-gradient(110deg,#171620,#101016)!important;box-shadow:0 6px 20px #00012!important;transition:border-color .18s,transform .18s,background .18s!important}
+.oracle-page .page-row:hover{border-color:#5a4c7c!important;background:linear-gradient(110deg,#201b2c,#12131c)!important;transform:translateY(-1px)!important}
+.oracle-page .page-row>div:first-child{display:grid!important;place-items:center!important;width:42px!important;height:42px!important;flex:0 0 42px!important;border:1px solid #514568!important;border-radius:13px!important;background:linear-gradient(145deg,#302642,#171622)!important;color:#d0c2ff!important;font-size:22px!important}
+.oracle-page .page-row .row-main strong{font-size:14px!important;font-weight:650!important;letter-spacing:-.1px!important}
+.oracle-page .page-row .row-main p{margin-top:5px!important;color:#aaa5bb!important;font-size:12px!important}
+.oracle-page .page-row .icon-action{min-height:36px!important;padding:8px 11px!important;border-radius:10px!important;background:#1c1a27!important;border-color:#3b354d!important;font-size:12px!important;white-space:nowrap!important}
+.oracle-page .page-row .icon-action:hover{border-color:#8170ad!important;background:#282239!important}
+.oracle-page .page-list>.page-card{padding:30px!important;text-align:center!important;border-style:dashed!important;background:#111019!important}
+.oracle-page .page-list>.page-card:before{content:'◷';display:block;font-size:30px;color:#a995f0;margin-bottom:10px}
+.oracle-memory-page{background:radial-gradient(ellipse at 14% 0%,#513b7650,transparent 38%),radial-gradient(ellipse at 90% 22%,#19425b38,transparent 33%),#090a10!important}
+.oracle-memory-page>div{max-width:1040px!important}
+.oracle-memory-page>div>div:first-child{padding:4px 0 23px!important;margin-bottom:23px!important;border-bottom:1px solid #2b2939!important}
+.oracle-memory-page>div>div:first-child h1{font-size:clamp(36px,5vw,54px)!important;font-weight:720!important;letter-spacing:-2.2px!important;margin:12px 0 0!important}
+.oracle-memory-page>div>div:first-child>div:first-child{display:inline-flex!important;padding:7px 10px!important;border:1px solid #494064!important;border-radius:999px!important;background:#211b32!important;font-size:10px!important;letter-spacing:2px!important}
+.oracle-memory-page>div>div:first-child button{border-radius:11px!important;padding:11px 14px!important;background:#171620!important;border-color:#454056!important}
+.oracle-memory-page>div>p{max-width:760px!important;margin:0 0 22px!important;color:#b2aec0!important;font-size:13px!important;line-height:1.8!important}
+.oracle-memory-page form{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:12px!important;padding:20px!important;margin-bottom:24px!important;border:1px solid #4b4164!important;border-radius:18px!important;background:linear-gradient(115deg,#211b31,#15141f 65%,#10151d)!important;box-shadow:0 18px 48px #0002!important}
+.oracle-memory-page form input{width:100%!important;min-height:48px!important;box-sizing:border-box!important;padding:13px 14px!important;border:1px solid #403a53!important;border-radius:12px!important;background:#0b0b12!important;color:#f6f2ff!important;font:inherit!important;font-size:13px!important}
+.oracle-memory-page form input:focus{border-color:#a995f0!important;box-shadow:0 0 0 3px #a995f01b!important}
+.oracle-memory-page form button{min-height:48px!important;padding:12px 17px!important;border-radius:12px!important;background:linear-gradient(135deg,#d0c4ff,#a895f0)!important;box-shadow:0 7px 24px #a995f025!important}
+.oracle-memory-page article{min-height:82px!important;box-sizing:border-box!important;padding:16px 18px!important;border:1px solid #343044!important;border-radius:16px!important;background:linear-gradient(110deg,#191723,#111119)!important;box-shadow:0 8px 26px #0002!important}
+.oracle-memory-page article:hover{border-color:#5a4c7c!important;transform:translateY(-1px)!important;background:linear-gradient(110deg,#211c2e,#12131c)!important}
+.oracle-memory-page article>div:first-child{width:46px!important;height:46px!important;flex-basis:46px!important;border-radius:14px!important;background:linear-gradient(145deg,#302642,#171622)!important;border-color:#514568!important}
+.oracle-memory-page article>div:nth-child(2){font-size:13px!important;color:#f0edf9!important;line-height:1.65!important}
+.oracle-memory-page article button{min-height:34px!important;border-radius:9px!important;background:#1c1a27!important;border-color:#3b354d!important;font-size:11px!important}
+.oracle-memory-page>div>div:last-child{padding-top:20px!important;border-top:1px solid #292737!important;margin-top:24px!important}
+.oracle-memory-page>div>div:last-child>span{font-size:12px!important;color:#aaa5bb!important}
+.oracle-memory-page>div>div:last-child>button{border-radius:10px!important;font-size:12px!important}
+.oracle-vault-page{background:radial-gradient(ellipse at 12% 0%,#48356d45,transparent 38%),#090a10!important}
+@media(max-width:760px){
+ .oracle-page .schedule-compose{grid-template-columns:minmax(0,1fr)!important}
+ .oracle-page .schedule-compose input[type=datetime-local]{width:100%!important}
+ .oracle-page .schedule-compose button,.oracle-memory-page form button{width:100%!important}
+ .oracle-memory-page form{grid-template-columns:minmax(0,1fr)!important;padding:14px!important}
+ .oracle-memory-page article{gap:10px!important;padding:12px!important}
+ .oracle-memory-page article>div:first-child{width:38px!important;height:38px!important;flex-basis:38px!important;font-size:20px!important}
+ .oracle-page-head{align-items:flex-start!important}
+}
+</style>
 </head>
 <body>
 <div class="app">
