@@ -20,6 +20,7 @@
 .attachment-card .file-name{padding:5px 7px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
 .attachment-card .remove-file{position:absolute;right:4px;top:4px;width:22px;height:22px;border:0;border-radius:50%;background:#14131bdd;color:white;font-size:15px;line-height:1}
 .voice-btn.listening{background:#513043;color:#ffb9d0;animation:pulse 1.1s infinite}
+.camera-overlay{position:fixed;inset:0;z-index:20;background:#08080ddd;display:grid;place-items:center;padding:18px}.camera-panel{width:min(600px,100%);background:#191920;border:1px solid #393545;border-radius:18px;padding:16px;box-shadow:var(--shadow)}.camera-panel video{width:100%;max-height:60vh;background:#08080c;border-radius:12px;object-fit:contain}.camera-head,.camera-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.camera-actions{justify-content:flex-end;margin:12px 0 0}.camera-actions button{border:1px solid var(--line);background:#252431;padding:9px 12px;border-radius:9px}.camera-actions .capture{background:var(--accent);color:#171320;border-color:transparent;font-weight:650}
 @keyframes pulse{50%{box-shadow:0 0 0 5px #ee8eae20}}
 .message .bubble img.inline-image{max-width:min(340px,100%);max-height:260px;object-fit:contain;border:1px solid var(--line);border-radius:10px;display:block;margin-top:9px}
 @media(max-width:760px){.attachment-card{width:88px}.attachment-card img{height:68px}}
@@ -71,12 +72,13 @@
   </section>
 </main>
 </div>
+<div class="camera-overlay hidden" id="cameraOverlay" role="dialog" aria-modal="true" aria-label="Camera capture"><div class="camera-panel"><div class="camera-head"><strong>Capture an image</strong><button class="icon-btn" id="closeCamera" aria-label="Close camera">×</button></div><video id="cameraVideo" autoplay playsinline></video><div class="camera-actions"><button id="switchCamera" type="button">Switch camera</button><button id="captureCamera" class="capture" type="button">Take photo</button></div><p class="footnote">Your browser will ask permission before opening the camera.</p></div></div>
 <div class="toast hidden" id="toast" role="status"></div>
 <script>
 (()=> {
 const $=id=>document.getElementById(id);
 const prompt=$('prompt'), messages=$('messages'), welcome=$('welcome');
-let attached=[], conversation=[], toastTimer, recognition=null, isListening=false, readAloud=false;
+let attached=[], conversation=[], toastTimer, recognition=null, isListening=false, readAloud=false, cameraStream=null, cameraFacing='environment';
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.add('hidden'),2800)}
 function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function inlineMD(s){return escapeHTML(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')}
@@ -114,7 +116,7 @@ async function send(){
  prompt.value='';prompt.style.height='';attached=[];updateAttachments();
  const waiting=addMessage('assistant','Thinking…','');
  try {
-   const endpoint=window.ORACLE_API_URL || (location.hostname.endsWith('github.io') ? '' : '/api/messages');
+   const endpoint=window.ORACLE_API_URL || localStorage.getItem('oracleApiUrl') || (location.hostname.endsWith('github.io') ? '' : '/api/messages');
    if(!endpoint) throw new Error('No AI backend is configured yet. The website needs a separately hosted backend before it can generate real AI replies.');
    const attachments=await Promise.all(filesNow.map(async f=>{
      if(f.size>12*1024*1024) throw new Error(f.name+' is larger than the 12 MB preview limit.');
@@ -157,9 +159,14 @@ $('micBtn').addEventListener('click',()=>{
  try{recognition.start()}catch(e){toast('Could not start microphone. Try again.')}
 });
 $('speakToggle').addEventListener('click',()=>{readAloud=!readAloud;$('speakToggle').setAttribute('aria-pressed',String(readAloud));$('speakToggle').style.color=readAloud?'var(--accent)':'';toast(readAloud?'Read-aloud enabled for future replies':'Read-aloud disabled');if(!readAloud&&'speechSynthesis'in window)speechSynthesis.cancel()});
+async function stopCamera(){if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null}$('cameraVideo').srcObject=null;$('cameraOverlay').classList.add('hidden')}
+async function openCamera(){if(!navigator.mediaDevices?.getUserMedia){toast('Camera access requires a secure HTTPS page and a supported browser.');return}try{cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:cameraFacing},audio:false});$('cameraVideo').srcObject=cameraStream;$('cameraOverlay').classList.remove('hidden')}catch(err){toast(err.name==='NotAllowedError'?'Camera permission was denied. Allow camera access in browser settings.':'Could not open the camera: '+(err.message||'unknown error'))}}
+$('cameraBtn').addEventListener('click',openCamera);$('closeCamera').addEventListener('click',stopCamera);$('cameraOverlay').addEventListener('click',e=>{if(e.target===$('cameraOverlay'))stopCamera()});
+$('switchCamera').addEventListener('click',async()=>{cameraFacing=cameraFacing==='environment'?'user':'environment';await stopCamera();await openCamera()});
+$('captureCamera').addEventListener('click',()=>{const video=$('cameraVideo');if(!video.videoWidth){toast('Camera is not ready yet.');return}const canvas=document.createElement('canvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d').drawImage(video,0,0);canvas.toBlob(blob=>{if(blob){attached.push(new File([blob],'oracle-camera-'+Date.now()+'.jpg',{type:'image/jpeg'}));updateAttachments();stopCamera();toast('Photo attached. Add a question and send it when ready.')}},'image/jpeg',.9)});
 const composer=$('.composer');composer.addEventListener('dragover',e=>{e.preventDefault();composer.style.borderColor='var(--accent)'});composer.addEventListener('dragleave',()=>composer.style.borderColor='');composer.addEventListener('drop',e=>{e.preventDefault();composer.style.borderColor='';attached.push(...Array.from(e.dataTransfer.files));updateAttachments();if(attached.length)toast(attached.length+' file(s) attached')});
 $('exportBtn').addEventListener('click',()=>{if(!conversation.length){toast('There is no conversation to export yet.');return}const blob=new Blob([conversation.map(m=>(m.role==='user'?'You':'ORACLE')+'\n'+m.content).join('\n\n---\n\n')],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='oracle-conversation.txt';a.click();URL.revokeObjectURL(url);toast('Conversation exported')});
-const info=()=>toast('Preview mode: no AI backend or file-upload service is connected.');$('infoBtn').addEventListener('click',info);$('aboutBtn').addEventListener('click',()=>alert('ORACLE — Intelligence Workspace\n\nThis is the first functional frontend preview. Chat, conversation reset, export, responsive navigation, and message formatting are available. AI generation and file processing require a secure backend connection.'));
+const info=()=>{const current=window.ORACLE_API_URL||localStorage.getItem('oracleApiUrl')||'';const value=prompt('ORACLE backend URL (not an API key). Example: https://your-project.vercel.app/api/messages\\n\\nLeave blank to disconnect the AI backend.',current);if(value===null)return;const trimmed=value.trim();if(trimmed){try{const u=new URL(trimmed);if(!['https:','http:'].includes(u.protocol))throw new Error();localStorage.setItem('oracleApiUrl',trimmed);toast('Backend URL saved in this browser')}catch{toast('Enter a valid http(s) backend URL')}}else{localStorage.removeItem('oracleApiUrl');toast('Backend disconnected')} $('modeNotice').textContent=trimmed?'Backend configured · AI requests are sent to your chosen server.':'GitHub Pages frontend · Add a deployed backend URL to enable AI replies. Never enter an API key here.'};$('infoBtn').addEventListener('click',info);$('aboutBtn').addEventListener('click',()=>alert('ORACLE — Intelligence Workspace\n\nThis is the first functional frontend preview. Chat, conversation reset, export, responsive navigation, and message formatting are available. AI generation and file processing require a secure backend connection.'));
 $('menuBtn').addEventListener('click',()=>{$('sidebar').classList.add('open');$('backdrop').classList.add('show')});$('backdrop').addEventListener('click',closeMenu);
 // Set this to the deployed backend URL after deploying the Next.js API, e.g.
 // window.ORACLE_API_URL = 'https://your-oracle-backend.vercel.app/api/messages';
