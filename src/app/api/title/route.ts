@@ -32,6 +32,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "This website is not allowed to use the ORACLE API." }, { status: 403, headers });
   }
 
+  if (process.env.ORACLE_REQUIRE_AUTH === "true") {
+    const supabaseUrl = process.env.SUPABASE_URL?.replace(/\\/$/, "");
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+    const token = request.headers.get("authorization")?.replace(/^Bearer\\s+/i, "");
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return NextResponse.json({ title: null, skipped: true }, { status: 200, headers });
+    }
+    if (!token) return NextResponse.json({ title: null, skipped: true }, { status: 200, headers });
+    try {
+      const authResponse = await fetch(supabaseUrl + "/auth/v1/user", {
+        headers: { apikey: supabaseAnonKey, Authorization: "Bearer " + token },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!authResponse.ok) return NextResponse.json({ title: null, skipped: true }, { status: 200, headers });
+    } catch {
+      return NextResponse.json({ title: null, skipped: true }, { status: 200, headers });
+    }
+  }
+
   // Naming keys are deliberately separate from conversation keys.
   // A missing/exhausted naming pool must never affect a completed chat reply.
   const keys = [...new Set([
