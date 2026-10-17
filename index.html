@@ -574,7 +574,7 @@ async function requestAIConversationTitle(messagesEndpoint,userText,assistantTex
   if(!chat||chat.customTitle)return;
   // Only apply this result if it still names the first message of this conversation.
   const first=chat.messages?.find(item=>item.role==='user');
-  if(first&&String(first.content||'').slice(0,5000)!==String(userText).slice(0,5000))return;
+  if(first&&!String(first.content||'').startsWith(String(userText).slice(0,200)))return;
   chat.title=title.slice(0,72);
   chat.autoTitleSource=String(userText).slice(0,5000);
   chat.updatedAt=Date.now();
