@@ -256,7 +256,7 @@ async function send(){
    saveCurrent();
    if(readAloud&&'speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(answer.replace(/[#*\x60>]/g,'')))}
  } catch(err) {
-   waiting.querySelector('.bubble').innerHTML=renderMD('**ORACLE can’t reach its AI model yet.**\n\n'+endpointSafeError(err)+'\n\nYour attachments are previewed locally; they are only sent to an AI service if you configure a backend endpoint.');
+   waiting.querySelector('.bubble').innerHTML=renderMD('**ORACLE can’t reach its AI model yet.**\n\n'+endpointSafeError(err)+'\n\nThe request failed before ORACLE could finish processing it. If you attached a file, check the backend error above and try again after the server update is deployed.');
    conversation.push({role:'assistant',content:'ORACLE connection status: '+endpointSafeError(err)});saveCurrent();
  }finally{oracleSending=false;$('sendBtn').disabled=false;$('sendBtn').removeAttribute('aria-busy');$('sendBtn').classList.remove('sending');messages.scrollIntoView({behavior:'smooth',block:'end'});}
 }
