@@ -268,9 +268,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ reply }, { headers });
   } catch (error) {
-    const message = error instanceof Error && error.name === "TimeoutError"
-      ? "The AI request timed out. Please try again."
-      : "ORACLE could not process this request. Please try again.";
-    return NextResponse.json({ error: message }, { status: 500, headers });
+    const errorName = error instanceof Error ? error.name : "UnknownError";
+    // Log the provider/network failure without logging API keys or request contents.
+    console.error("[ORACLE API] Provider request failed:", errorName);
+    const message = errorName === "TimeoutError"
+      ? "The AI provider took too long to respond. Please retry; if this keeps happening, check provider status and model availability."
+      : errorName === "TypeError"
+        ? "ORACLE could not connect to the AI provider. Check ORACLE_API_BASE_URL in Vercel (for Groq, use https://api.groq.com/openai/v1) and confirm the provider is reachable."
+        : "ORACLE could not process this request. Check the Vercel runtime logs for the provider request failure.";
+    return NextResponse.json({ error: message, code: "AI_PROVIDER_REQUEST_FAILED" }, { status: 500, headers });
   }
 }
