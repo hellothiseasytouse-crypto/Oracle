@@ -559,8 +559,8 @@ async function requestAIConversationTitle(messagesEndpoint,userText,assistantTex
  try{
   if(!messagesEndpoint||!userText)return;
   const titleUrl=new URL(messagesEndpoint,location.href);
-  if(!/\\/api\\/messages\\/?$/.test(titleUrl.pathname))return;
-  titleUrl.pathname=titleUrl.pathname.replace(/messages\\/?$/,'title');
+  if(!/\/api\/messages\/?$/.test(titleUrl.pathname))return;
+  titleUrl.pathname=titleUrl.pathname.replace(/messages\/?$/,'title');
   titleUrl.search='';
   titleUrl.hash='';
   const headers={'Content-Type':'application/json'};
@@ -572,7 +572,6 @@ async function requestAIConversationTitle(messagesEndpoint,userText,assistantTex
   if(!title||!chatId)return;
   const chat=chats.find(item=>item.id===chatId);
   if(!chat||chat.customTitle)return;
-  // Only apply this result if it still names the first message of this conversation.
   const first=chat.messages?.find(item=>item.role==='user');
   if(first&&!String(first.content||'').startsWith(String(userText).slice(0,200)))return;
   chat.title=title.slice(0,72);
@@ -581,7 +580,7 @@ async function requestAIConversationTitle(messagesEndpoint,userText,assistantTex
   saveChats();
   renderHistory();
  }catch{
-  // Title generation is optional: naming failures must stay invisible and never fail a reply.
+  // Naming is optional; failures never affect the reply or loading animation.
  }
 }
 
