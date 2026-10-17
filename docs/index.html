@@ -217,10 +217,13 @@ async function send(){
  const filesNow=[...attached];
  const imagePreviews=filesNow.filter(f=>f.type.startsWith('image/')).map(f=>URL.createObjectURL(f));
  window.__lastAttachedImages=imagePreviews;
- const shown=text+(filesNow.length?'\n\nAttached: '+filesNow.map(f=>f.name).join(', '):'');
+ const nonImageFiles=filesNow.filter(f=>!f.type.startsWith('image/'));
+ const shown=text+(nonImageFiles.length?'\n\nAttached: '+nonImageFiles.map(f=>f.name).join(', '):'');
  const savedFact=extractMemory(text.trim());if(savedFact)toast('ORACLE memory saved: '+savedFact);
  welcome.classList.add('hidden');$('modeNotice').classList.remove('hidden');
- addMessage('user',shown);conversation.push({role:'user',content:shown});
+ const userRow=addMessage('user',shown);const userBubble=userRow.querySelector('.bubble');
+ imagePreviews.forEach((src,i)=>{const img=document.createElement('img');img.className='inline-image user-attachment-image';img.src=src;img.alt=filesNow.filter(f=>f.type.startsWith('image/'))[i]?.name||'Attached image';img.loading='lazy';userBubble.appendChild(img)});
+ conversation.push({role:'user',content:shown|| (filesNow.some(f=>f.type.startsWith('image/'))?'Please analyze the attached image.':'Please review the attached file.')});
  const activeForTitle=currentChat();if(activeForTitle&&!activeForTitle.customTitle){const titleSource=text||filesNow[0]?.name||'Attachment';const existingAuto=String(activeForTitle.autoTitleSource||'');const previousWasFiller=/^(hey|hello|hi|yo|sup|thanks|thank you|ok|okay|cool|nice|lol|lmao|yes|no|yep|nope)\b/i.test(existingAuto.trim());if(!activeForTitle.autoTitleSource||previousWasFiller||activeForTitle.title==='New conversation'){activeForTitle.title=makeChatTitle(titleSource);activeForTitle.autoTitleSource=titleSource;}activeForTitle.updatedAt=Date.now();saveChats();renderHistory();}
  refreshHistory(text||filesNow[0]?.name||'Attachment');
  prompt.value='';prompt.style.height='';attached=[];updateAttachments();
@@ -236,8 +239,12 @@ async function send(){
      }
      return item;
    }));
+   const webQuery=/\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/i.test(text);
+   let webPages=[];let searchStatus=null;
+   if(webQuery){searchStatus=addActivityIndicator(waiting.querySelector('.bubble'),'Searching the web');try{webPages=await getWebSearchResults(text)}catch{}if(searchStatus)searchStatus.remove();if(webPages.length){const lastUserIndex=conversation.map(m=>m.role).lastIndexOf('user');if(lastUserIndex>=0){const context=webPages.map((p,i)=>'['+(i+1)+'] '+p.title+' — '+(p.extract||'')+' Source: '+p.url).join('\n');const outgoing=conversation.map(m=>({...m}));outgoing[lastUserIndex].content+='\n\nLIVE WEB SEARCH RESULTS (use these to answer the request; do not claim you cannot browse):\n'+context;window.__oracleOutgoingMessages=outgoing}}}
    const requestHeaders={'Content-Type':'application/json'};if(supabaseClient){try{const {data:{session}}=await supabaseClient.auth.getSession();if(session?.access_token)requestHeaders.Authorization='Bearer '+session.access_token}catch{}}
-   const response=await fetch(endpoint,{method:'POST',headers:requestHeaders,body:JSON.stringify({messages:conversation,attachments,memory:memoryContext()})});
+   const outgoingMessages=window.__oracleOutgoingMessages||conversation;delete window.__oracleOutgoingMessages;
+   const response=await fetch(endpoint,{method:'POST',headers:requestHeaders,body:JSON.stringify({messages:outgoingMessages,attachments,memory:memoryContext()})});
    const data=await response.json().catch(()=>({}));
    if(!response.ok) throw new Error(data.error || ('AI server returned HTTP '+response.status+'. Check the backend deployment and API key.'));
    const answer=data.reply||data.message||data.output_text||data.choices?.[0]?.message?.content;
@@ -245,7 +252,7 @@ async function send(){
    waiting.querySelector('.bubble').innerHTML=renderMD(answer);addCodeDownloads(waiting.querySelector('.bubble'),text);addChoiceButtons(answer,waiting.querySelector('.bubble'));
    conversation.push({role:'assistant',content:answer});
    await maybeShowImages(text,waiting.querySelector('.bubble'));
-   await maybeSearchWeb(text,waiting.querySelector('.bubble'));
+   await maybeSearchWeb(text,waiting.querySelector('.bubble'),webPages);
    saveCurrent();
    if(readAloud&&'speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(answer.replace(/[#*\x60>]/g,'')))}
  } catch(err) {
@@ -309,10 +316,16 @@ async function maybeShowImages(query,bubble){
   for(const p of pages){const card=document.createElement('a');card.className='image-result';card.href=p.link;card.target='_blank';card.rel='noopener noreferrer';const img=document.createElement('img');img.loading='lazy';img.src=p.source;img.alt=p.title;const copy=document.createElement('span');copy.className='image-result-copy';const title=document.createElement('strong');title.textContent=p.title;const desc=document.createElement('small');desc.textContent=(p.extract||'Open source for details.').slice(0,150);copy.append(title,desc);card.append(img,copy);grid.append(card)}
  }catch{loading.remove();grid.remove();heading.textContent='Could not load images right now'}
 }
-async function maybeSearchWeb(query,bubble){
+async function getWebSearchResults(query){
+ const q=String(query||'').replace(/\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/ig,' ').trim();
+ const url='https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(q)+'&gsrnamespace=0&gsrlimit=6&prop=extracts&exintro=1&explaintext=1&exsentences=2&format=json&origin=*';
+ const res=await fetch(url);if(!res.ok)throw new Error('Search service unavailable');const data=await res.json();
+ return Object.values(data.query?.pages||{}).sort((a,b)=>a.index-b.index).map(item=>({title:item.title,extract:item.extract||'',url:'https://en.wikipedia.org/?curid='+item.pageid}));
+}
+async function maybeSearchWeb(query,bubble,providedPages){
  const q=String(query||'').trim();if(!q||!/\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/i.test(q))return;
- const panel=document.createElement('section');panel.className='oracle-web-results';const heading=document.createElement('p');heading.className='image-results-label';heading.textContent='Web search';panel.append(heading);const activity=addActivityIndicator(panel,'Searching the web');bubble.append(panel);
- try{const url='https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(q.replace(/\b(search the web|search web|search online|look up online|look this up|find sources|web search|from the internet|on the internet)\b/ig,' ').trim())+'&gsrnamespace=0&gsrlimit=6&prop=extracts&exintro=1&explaintext=1&exsentences=2&format=json&origin=*';const res=await fetch(url);if(!res.ok)throw new Error('search unavailable');const data=await res.json();const pages=Object.values(data.query?.pages||{}).sort((a,b)=>a.index-b.index);activity.remove();if(!pages.length){const p=document.createElement('p');p.textContent='No matching pages found. Try different search terms.';panel.append(p);return}const list=document.createElement('div');list.className='oracle-web-list';for(const item of pages){const a=document.createElement('a');a.href='https://en.wikipedia.org/?curid='+item.pageid;a.target='_blank';a.rel='noopener noreferrer';a.className='oracle-web-result';const h=document.createElement('strong');h.textContent=item.title;const d=document.createElement('small');d.textContent=(item.extract||'Open this page to read more.').slice(0,220);const domain=document.createElement('span');domain.textContent='Wikipedia · Open source ↗';a.append(h,d,domain);list.append(a)}panel.append(list);const source=document.createElement('small');source.className='oracle-search-note';source.textContent='Search results shown here use Wikipedia’s public search API; this is not a full Google-style web index.';panel.append(source)}catch{activity.remove();const p=document.createElement('p');p.textContent='Web search could not load. Check your connection and try again.';panel.append(p)}
+ const panel=document.createElement('section');panel.className='oracle-web-results';const heading=document.createElement('p');heading.className='image-results-label';heading.textContent='Web search results';panel.append(heading);bubble.append(panel);
+ try{const pages=Array.isArray(providedPages)?providedPages:await getWebSearchResults(q);if(!pages.length){const p=document.createElement('p');p.textContent='No matching pages found. Try different search terms.';panel.append(p);return}const list=document.createElement('div');list.className='oracle-web-list';for(const item of pages){const a=document.createElement('a');a.href=item.url;a.target='_blank';a.rel='noopener noreferrer';a.className='oracle-web-result';const h=document.createElement('strong');h.textContent=item.title;const d=document.createElement('small');d.textContent=(item.extract||'Open this page to read more.').slice(0,220);const domain=document.createElement('span');domain.textContent='Wikipedia · Open source ↗';a.append(h,d,domain);list.append(a)}panel.append(list);const source=document.createElement('small');source.className='oracle-search-note';source.textContent='Live results from Wikipedia’s public search API; this is not a full Google-style web index.';panel.append(source)}catch{const p=document.createElement('p');p.textContent='Web search could not load. Check your connection and try again.';panel.append(p)}
 }
 
 function updateAttachments(){const box=$('attachList');box.replaceChildren();if(!attached.length){box.classList.add('hidden');return}box.classList.remove('hidden');attached.forEach((f,i)=>{const card=document.createElement('div');card.className='attachment-card';if(f.type.startsWith('image/')){const im=document.createElement('img');im.alt=f.name;im.src=URL.createObjectURL(f);card.appendChild(im)}else{const ico=document.createElement('div');ico.className='file-icon';ico.textContent=f.type==='application/pdf'?'PDF':'📄';card.appendChild(ico)}const name=document.createElement('div');name.className='file-name';name.textContent=f.name;name.title=f.name;card.appendChild(name);const rm=document.createElement('button');rm.className='remove-file';rm.type='button';rm.textContent='×';rm.title='Remove '+f.name;rm.onclick=()=>{attached.splice(i,1);updateAttachments()};card.appendChild(rm);box.appendChild(card)})}
