@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     const assistantText = typeof body.assistantText === "string" ? body.assistantText.slice(0, 2500).trim() : "";
     if (!userText) return NextResponse.json({ title: null, skipped: true }, { status: 200, headers });
 
-    const baseUrl = (process.env.ORACLE_NAMING_API_BASE_URL || process.env.ORACLE_API_BASE_URL || "https://api.groq.com/openai/v1").replace(/\/$/, "");
+    const baseUrl = (process.env.ORACLE_NAMING_API_BASE_URL || "https://api.groq.com/openai/v1").replace(/\/$/, "");
     const model = process.env.ORACLE_NAMING_MODEL || process.env.ORACLE_MODEL || "openai/gpt-oss-20b";
     let lastError = "";
     for (const key of keys) {
