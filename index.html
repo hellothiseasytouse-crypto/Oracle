@@ -576,11 +576,29 @@ async function requestAIConversationTitle(messagesEndpoint,userText,assistantTex
   if(first&&!String(first.content||'').startsWith(String(userText).slice(0,200)))return;
   chat.title=title.slice(0,72);
   chat.autoTitleSource=String(userText).slice(0,5000);
+  chat.aiTitleGenerated=true;
   chat.updatedAt=Date.now();
   saveChats();
   renderHistory();
  }catch{
   // Naming is optional; failures never affect the reply or loading animation.
+ }
+}
+
+async function backfillPreviousConversationTitles(){
+ try{
+  const endpoint=window.ORACLE_API_URL||localStorage.getItem('oracleApiUrl')||(location.hostname.endsWith('github.io')?'':'/api/messages');
+  if(!endpoint)return;
+  const pending=chats.filter(chat=>!chat.customTitle&&!chat.aiTitleGenerated&&Array.isArray(chat.messages)&&chat.messages.some(m=>m.role==='user'));
+  for(const chat of pending){
+   const firstUser=chat.messages.find(m=>m.role==='user');
+   if(!firstUser)continue;
+   const firstAssistant=chat.messages.find(m=>m.role==='assistant');
+   await requestAIConversationTitle(endpoint,firstUser.content||'',firstAssistant?.content||'',chat.id);
+   await new Promise(resolve=>setTimeout(resolve,450));
+  }
+ }catch{
+  // Backfilling is optional; existing conversations remain usable if naming is unavailable.
  }
 }
 
@@ -846,6 +864,9 @@ loadChats();
 openChat(activeChatId);
 // Permanent public backend endpoint. The secret API key stays on Vercel.
 window.ORACLE_API_URL = 'https://oracle-sepia-one.vercel.app/api/messages';
+// Rename older conversations that have not yet received an AI-generated title.
+void backfillPreviousConversationTitles();
+
 // Set this to the deployed backend URL after deploying the Next.js API, e.g.
 // window.ORACLE_API_URL = 'https://your-oracle-backend.vercel.app/api/messages';
 if(window.ORACLE_API_URL || localStorage.getItem('oracleApiUrl')) {
