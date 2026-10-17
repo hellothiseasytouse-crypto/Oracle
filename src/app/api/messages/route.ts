@@ -251,6 +251,12 @@ export async function POST(request: NextRequest) {
       }
       upstream = candidate;
       data = candidateData;
+      // A Groq organization/model TPM limit is shared across keys. Rotating through
+      // every key cannot clear it, so stop immediately and try a genuinely smaller
+      // request instead of reporting that every key is invalid.
+      const sharedTokenLimit = isGroq && candidate.status === 429 &&
+        /tokens per minute|token per minute|\bTPM\b|requested.*token|limit.*token/i.test(lastProviderError);
+      if (sharedTokenLimit) break;
     }
     if (!upstream) {
       return NextResponse.json({ error: `Tried ${attemptedKeys} of ${apiKeys.length} configured API key(s). Last provider response: ${lastProviderError}`, code: "API_KEY_POOL_REJECTED", attemptedKeys, providerStatus: lastProviderStatus || undefined }, { status: 503, headers });
@@ -284,18 +290,41 @@ export async function POST(request: NextRequest) {
       const tokenPressure = upstream.status === 429 &&
         /tokens per minute|token per minute|tpm|rate.?limit.*token|requested.*token|limit.*token/i.test(message);
       if (isGroq && tokenPressure) {
-        const compactMessages = [providerMessages[0], ...validMessages.slice(-4).map(item => ({
-          role: item.role,
-          content: item.content.slice(-1200),
-        }))];
+        // The normal system prompt is intentionally detailed and can itself consume
+        // most of Groq's per-minute budget. The emergency path uses a concise ORACLE
+        // identity prompt and only the latest user turn, preserving image parts when
+        // present. This is materially smaller than merely changing the model.
+        const compactSystem = {
+          role: "system",
+          content: "You are ORACLE, the helpful AI assistant in the user's ORACLE workspace. Keep a consistent, friendly, direct persona. Use relevant supplied context, be accurate, never invent facts or claim unverified actions. Follow safety and copyright limits. Reply in clear Markdown and answer the latest request first."
+        };
+        const lastUserTurn = [...providerMessages].reverse().find(item => item.role === "user");
+        let compactUserTurn: Record<string, unknown> | null = null;
+        if (lastUserTurn) {
+          const content = lastUserTurn.content;
+          if (typeof content === "string") {
+            compactUserTurn = { role: "user", content: content.slice(-2200) };
+          } else if (Array.isArray(content)) {
+            compactUserTurn = {
+              role: "user",
+              content: content.filter((part: any) =>
+                part?.type === "image_url" ||
+                (part?.type === "text" && typeof part.text === "string")
+              ).map((part: any) => part?.type === "text"
+                ? { ...part, text: String(part.text).slice(-2200) }
+                : part).slice(-5),
+            };
+          }
+        }
+        const compactMessages = compactUserTurn ? [compactSystem, compactUserTurn] : [compactSystem];
         const compactRetry = await fetch(baseUrl + "/chat/completions", {
           method: "POST",
           headers: { "Authorization": "Bearer " + activeApiKey, "Content-Type": "application/json" },
           body: JSON.stringify({
             model: "openai/gpt-oss-20b",
             messages: compactMessages,
-            temperature: 0.4,
-            max_tokens: 640,
+            temperature: 0.3,
+            max_tokens: 256,
           }),
           signal: AbortSignal.timeout(45000),
         });
