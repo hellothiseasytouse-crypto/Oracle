@@ -114,6 +114,53 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline-offset:2
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
 
+
+/* Unified polish for every workspace surface */
+#history .history-item{border:1px solid transparent!important;border-radius:10px!important;margin:3px 0!important;min-height:38px}
+#history .history-item:hover{border-color:#393448!important;background:#1b1925!important}
+#history .history-item.active{border-color:#4b4265!important;background:#242033!important}
+#historySearch{border-radius:10px!important}
+#messages{scrollbar-width:thin;scrollbar-color:#383347 transparent}
+#messages .message{animation:oraclePageIn .18s ease both}
+#messages .assistant-message,#messages .assistant .bubble{line-height:1.75}
+#messages pre{max-width:100%;overflow:auto;border:1px solid #302d40;border-radius:12px;background:#0b0a10;padding:14px}
+#messages code{overflow-wrap:anywhere}
+#messages table{display:block;max-width:100%;overflow:auto;border-collapse:collapse}
+#messages th,#messages td{padding:8px 10px;border:1px solid #393448}
+#messages blockquote{border-left:3px solid #9b88ed;margin:12px 0;padding:4px 0 4px 14px;color:#c5bfd6}
+#messages a{color:#c0b0ff;text-underline-offset:3px}
+#messages img{border-radius:12px;max-width:100%;height:auto}
+#attachList>*{border:1px solid #393448;border-radius:10px}
+#prompt{caret-color:#c0b0ff}
+.composer:focus-within,.composer-wrap:focus-within{border-color:#716095!important;box-shadow:0 0 0 3px #b9a7ff0b}
+.welcome h1{letter-spacing:-1.7px}
+.welcome p{line-height:1.7}
+.oracle-memory-page,.oracle-vault-page{background:radial-gradient(ellipse at 75% 0%,#33264c35,transparent 44%),#09090f!important}
+.oracle-memory-page>div,.oracle-vault-page>div{max-width:1120px!important}
+.oracle-memory-page article,.oracle-vault-page article{border-color:#343044!important;box-shadow:0 10px 28px #00018;transition:border-color .18s,transform .18s,background .18s}
+.oracle-memory-page article:hover,.oracle-vault-page article:hover{border-color:#62547f!important}
+.oracle-memory-page input,.oracle-vault-page input{min-height:42px;outline:none}
+.oracle-memory-page input:focus,.oracle-vault-page input:focus{border-color:#a995f0!important;box-shadow:0 0 0 3px #a995f018}
+.oracle-memory-page button,.oracle-vault-page button{font:inherit;transition:filter .16s,border-color .16s,transform .16s;cursor:pointer}
+.oracle-memory-page button:hover,.oracle-vault-page button:hover{filter:brightness(1.08)}
+.oracle-page .schedule-compose input{flex:1 1 220px}
+.oracle-page .schedule-compose button{flex:0 0 auto}
+.oracle-page .page-row:hover{border-color:#49415e}
+.oracle-page .page-row .row-main{overflow-wrap:anywhere}
+.oracle-page .page-row button.danger{border:1px solid #63394b;background:#28141e;color:#ffc2d0;border-radius:9px;padding:8px 11px}
+.oracle-page h2{letter-spacing:-.4px}
+.oracle-page p{overflow-wrap:anywhere}
+#toast{backdrop-filter:blur(12px)}
+@media(max-width:540px){
+ #messages pre{padding:10px;font-size:12px}
+ #messages th,#messages td{padding:6px;font-size:12px}
+ .oracle-memory-page,.oracle-vault-page{padding:16px!important}
+ .oracle-memory-page h1,.oracle-vault-page h1{font-size:30px!important}
+ .oracle-page-head{align-items:flex-start;flex-direction:column}
+ .oracle-page-head button{width:100%}
+ .oracle-page .schedule-compose>*{width:100%;box-sizing:border-box}
+}
+
 /* Account Center: settings-style layout */
 .account-overlay{background:#05050bd9!important;backdrop-filter:blur(16px)!important;padding:clamp(10px,3vw,28px)!important;align-items:center!important}
 .account-panel{width:min(980px,100%)!important;max-height:min(88vh,900px)!important;overflow:auto!important;border:1px solid #39334c!important;border-radius:22px!important;background:linear-gradient(145deg,#171620 0%,#101016 75%)!important;box-shadow:0 32px 100px #0009!important;padding:clamp(18px,3vw,32px)!important;scrollbar-width:thin;scrollbar-color:#47405e transparent}
