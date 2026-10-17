@@ -11,7 +11,7 @@ const allowedOrigins = new Set([
 
 function corsHeaders(origin: string | null) {
   const headers = new Headers();
-  if (origin && allowedOrigins.has(origin)) {
+  if (origin && (allowedOrigins.has(origin) || origin === request.nextUrl.origin)) {
     headers.set("Access-Control-Allow-Origin", origin);
     headers.set("Vary", "Origin");
   }
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
   const headers = corsHeaders(origin);
 
-  if (origin && !allowedOrigins.has(origin)) {
+  if (origin && !allowedOrigins.has(origin) && origin !== request.nextUrl.origin) {
     return NextResponse.json({ error: "This website is not allowed to use the ORACLE API." }, { status: 403, headers });
   }
 
