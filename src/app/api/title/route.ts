@@ -67,8 +67,12 @@ export async function POST(request: NextRequest) {
   }
 
   // Keep naming keys separate from chat keys, but accept the same safe paste formats.
-  const baseUrl = (process.env.ORACLE_NAMING_API_BASE_URL || "https://api.groq.com/openai/v1").replace(/\/$/, "");
   const rawKeyPool = [process.env.ORACLE_NAMING_API_KEYS || "", process.env.ORACLE_NAMING_API_KEY || ""].join("\n");
+  const configuredBaseUrl = process.env.ORACLE_NAMING_API_BASE_URL?.trim();
+  const hasGroqKeys = /\bgsk_[A-Za-z0-9_-]+\b/.test(rawKeyPool);
+  const baseUrl = (hasGroqKeys && (!configuredBaseUrl || /api\.openai\.com/i.test(configuredBaseUrl))
+    ? "https://api.groq.com/openai/v1"
+    : configuredBaseUrl || "https://api.groq.com/openai/v1").replace(/\/$/, "");
   const keys = parseApiKeys(rawKeyPool, baseUrl);
   if (!keys.length) return NextResponse.json({ title: null, skipped: true }, { status: 200, headers });
 
