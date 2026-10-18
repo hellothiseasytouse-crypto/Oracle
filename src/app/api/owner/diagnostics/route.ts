@@ -28,7 +28,7 @@ export async function OPTIONS(request: NextRequest) {
 }
 
 function authorized(request: NextRequest) {
-  const expected = process.env.ORACLE_OWNER_TOKEN;
+  const expected = process.env.ORACLE_OWNER_TOKEN_2 || process.env.ORACLE_OWNER_TOKEN;
   const supplied = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") || "";
   return !!expected && supplied.length > 0 && supplied === expected;
 }
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
   const headers = corsHeaders(origin, request.nextUrl.origin);
   if (origin && !allowedOrigins.has(origin) && origin !== request.nextUrl.origin) return NextResponse.json({ error: "This origin is not allowed." }, { status: 403, headers });
-  if (!authorized(request)) return NextResponse.json({ error: "Owner authorization required. Configure ORACLE_OWNER_TOKEN on the server." }, { status: 401, headers });
+  if (!authorized(request)) return NextResponse.json({ error: "Owner authorization required. Configure ORACLE_OWNER_TOKEN_2 (or legacy ORACLE_OWNER_TOKEN) on the server." }, { status: 401, headers });
   const body = await request.json().catch(() => ({}));
   const command = typeof body.command === "string" ? body.command.toLowerCase().trim() : "health";
   const chat = pool("ORACLE");
