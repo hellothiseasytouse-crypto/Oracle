@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: results.some(x => x.ok), command, model: naming.model, results }, { headers });
   }
   if (command === "test" || command === "test-keys" || command === "random") {
-    if (!chat.keys.length) return NextResponse.json({ ok: false, command, error: "No chat API keys configured.", results: [] }, { status: 200 });
+    if (!chat.keys.length) return NextResponse.json({ ok: false, command, error: "No chat API keys configured.", results: [] }, { status: 200, headers });
     const results = [];
     for (let i = 0; i < chat.keys.length; i++) results.push({ label: "Chat key " + (i + 1), ...(await probe(chat.base, chat.keys[i], chat.model) ) });
     return NextResponse.json({ ok: results.some(x => x.ok), command, model: chat.model, results }, { headers });
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     const url = process.env.SUPABASE_URL?.replace(/\/$/, "");
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const content = typeof body.content === "string" ? body.content.trim().slice(0, 3000) : "";
-    if (!url || !serviceKey) return NextResponse.json({ ok: false, error: "Shared memory needs SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY." }, { status: 200 });
+    if (!url || !serviceKey) return NextResponse.json({ ok: false, error: "Shared memory needs SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY." }, { status: 200, headers });
     if (!content) return NextResponse.json({ ok: false, error: "Enter a memory to save." }, { status: 400, headers });
     const res = await fetch(url + "/rest/v1/oracle_memories", { method: "POST", headers: { apikey: serviceKey, Authorization: "Bearer " + serviceKey, "Content-Type": "application/json", Prefer: "return=representation" }, body: JSON.stringify({ content, source: "owner-console" }), signal: AbortSignal.timeout(10000) });
     const data = await res.json().catch(() => ({}));
