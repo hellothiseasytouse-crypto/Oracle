@@ -3,6 +3,30 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const allowedOrigins = new Set([
+  "https://hellothiseasytouse-crypto.github.io",
+  "http://localhost:3000",
+  "http://localhost:3001",
+]);
+
+function corsHeaders(origin: string | null, requestOrigin: string) {
+  const headers = new Headers();
+  if (origin && (allowedOrigins.has(origin) || origin === requestOrigin)) {
+    headers.set("Access-Control-Allow-Origin", origin);
+    headers.set("Vary", "Origin");
+  }
+  headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  headers.set("Access-Control-Max-Age", "86400");
+  return headers;
+}
+
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get("origin");
+  if (origin && !allowedOrigins.has(origin) && origin !== request.nextUrl.origin) return new NextResponse(null, { status: 403 });
+  return new NextResponse(null, { status: 204, headers: corsHeaders(origin, request.nextUrl.origin) });
+}
+
 function authorized(request: NextRequest) {
   const expected = process.env.ORACLE_OWNER_TOKEN;
   const supplied = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") || "";
@@ -42,7 +66,10 @@ async function probe(base: string, key: string, model: string) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!authorized(request)) return NextResponse.json({ error: "Owner authorization required. Configure ORACLE_OWNER_TOKEN on the server." }, { status: 401 });
+  const origin = request.headers.get("origin");
+  const headers = corsHeaders(origin, request.nextUrl.origin);
+  if (origin && !allowedOrigins.has(origin) && origin !== request.nextUrl.origin) return NextResponse.json({ error: "This origin is not allowed." }, { status: 403, headers });
+  if (!authorized(request)) return NextResponse.json({ error: "Owner authorization required. Configure ORACLE_OWNER_TOKEN on the server." }, { status: 401, headers });
   const body = await request.json().catch(() => ({}));
   const command = typeof body.command === "string" ? body.command.toLowerCase().trim() : "health";
   const chat = pool("ORACLE");
@@ -58,34 +85,34 @@ export async function POST(request: NextRequest) {
     });
   }
   if (command === "titlemeaning" || command === "title" || command === "test-title") {
-    if (!naming.keys.length) return NextResponse.json({ ok: false, command, error: "No title API keys configured.", results: [] }, { status: 200 });
+    if (!naming.keys.length) return NextResponse.json({ ok: false, command, error: "No title API keys configured.", results: [] }, { status: 200, headers });
     const results = [];
     for (let i = 0; i < naming.keys.length; i++) results.push({ label: "Title key " + (i + 1), ...(await probe(naming.base, naming.keys[i], naming.model)) });
-    return NextResponse.json({ ok: results.some(x => x.ok), command, model: naming.model, results });
+    return NextResponse.json({ ok: results.some(x => x.ok), command, model: naming.model, results }, { headers });
   }
   if (command === "test" || command === "test-keys" || command === "random") {
     if (!chat.keys.length) return NextResponse.json({ ok: false, command, error: "No chat API keys configured.", results: [] }, { status: 200 });
     const results = [];
     for (let i = 0; i < chat.keys.length; i++) results.push({ label: "Chat key " + (i + 1), ...(await probe(chat.base, chat.keys[i], chat.model) ) });
-    return NextResponse.json({ ok: results.some(x => x.ok), command, model: chat.model, results });
+    return NextResponse.json({ ok: results.some(x => x.ok), command, model: chat.model, results }, { headers });
   }
   if (command === "memory") {
     const url = process.env.SUPABASE_URL?.replace(/\/$/, "");
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!url || !serviceKey) return NextResponse.json({ ok: false, error: "Shared memory needs SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY." }, { status: 200 });
+    if (!url || !serviceKey) return NextResponse.json({ ok: false, error: "Shared memory needs SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY." }, { status: 200, headers });
     const res = await fetch(url + "/rest/v1/oracle_memories?select=id,content,created_at&order=created_at.desc&limit=30", { headers: { apikey: serviceKey, Authorization: "Bearer " + serviceKey }, signal: AbortSignal.timeout(10000) });
     const data = await res.json().catch(() => []);
-    return NextResponse.json({ ok: res.ok, status: res.status, memories: res.ok ? data : [], error: res.ok ? undefined : "Could not read shared memory. Create the oracle_memories table using the supplied SQL." });
+    return NextResponse.json({ ok: res.ok, status: res.status, memories: res.ok ? data : [], error: res.ok ? undefined : "Could not read shared memory. Create the oracle_memories table using the supplied SQL." }, { headers });
   }
   if (command === "save-memory") {
     const url = process.env.SUPABASE_URL?.replace(/\/$/, "");
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const content = typeof body.content === "string" ? body.content.trim().slice(0, 3000) : "";
     if (!url || !serviceKey) return NextResponse.json({ ok: false, error: "Shared memory needs SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY." }, { status: 200 });
-    if (!content) return NextResponse.json({ ok: false, error: "Enter a memory to save." }, { status: 400 });
+    if (!content) return NextResponse.json({ ok: false, error: "Enter a memory to save." }, { status: 400, headers });
     const res = await fetch(url + "/rest/v1/oracle_memories", { method: "POST", headers: { apikey: serviceKey, Authorization: "Bearer " + serviceKey, "Content-Type": "application/json", Prefer: "return=representation" }, body: JSON.stringify({ content, source: "owner-console" }), signal: AbortSignal.timeout(10000) });
     const data = await res.json().catch(() => ({}));
-    return NextResponse.json({ ok: res.ok, memory: res.ok ? (Array.isArray(data) ? data[0] : data) : undefined, error: res.ok ? undefined : "Memory save failed. Check the table schema and server logs." }, { status: res.ok ? 200 : 502 });
+    return NextResponse.json({ ok: res.ok, memory: res.ok ? (Array.isArray(data) ? data[0] : data) : undefined, error: res.ok ? undefined : "Memory save failed. Check the table schema and server logs." }, { status: res.ok ? 200 : 502, headers });
   }
-  return NextResponse.json({ ok: false, error: "Unknown command. Try health, test, titlemeaning, memory, or save-memory." }, { status: 400 });
+  return NextResponse.json({ ok: false, error: "Unknown command. Try health, test, titlemeaning, memory, or save-memory." }, { status: 400, headers });
 }
