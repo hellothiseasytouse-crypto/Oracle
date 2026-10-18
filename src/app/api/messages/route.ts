@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     const attachments = Array.isArray(body.attachments) ? body.attachments as IncomingAttachment[] : [];
     let memory = typeof body.memory === "string" ? body.memory.slice(0, 10000).trim() : "";
     // Pull shared verified notes from Supabase so every configured model/key can use them.
-    const memoryUrl = process.env.SUPABASE_URL?.replace(/\\/$/, "");
+    const memoryUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
     const memoryServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (memoryUrl && memoryServiceKey) {
       try {
@@ -223,8 +223,8 @@ export async function POST(request: NextRequest) {
     // Execute real web research when the question is time-sensitive, niche, or explicitly asks for sources.
     // Tavily keys are server-only. Fail over between configured search keys without exposing them.
     let webSources: Array<{ title: string; url: string; content: string }> = [];
-    const rawSearchKeys = [process.env.TAVILY_API_KEYS || "", process.env.TAVILY_API_KEY || ""].join("\\n");
-    const searchKeys = [...new Set(rawSearchKeys.split(/[\\r\\n,;\\s]+/).map(value => value.trim()).filter(Boolean))];
+    const rawSearchKeys = [process.env.TAVILY_API_KEYS || "", process.env.TAVILY_API_KEY || ""].join("\n");
+    const searchKeys = [...new Set(rawSearchKeys.split(/[\r\n,;\s]+/).map(value => value.trim()).filter(Boolean))];
     if (isWebSearchRequest && searchKeys.length && lastUserText.trim()) {
       for (const searchKey of searchKeys) {
         try {
