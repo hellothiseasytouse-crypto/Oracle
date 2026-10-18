@@ -6,7 +6,7 @@ The owner console is `owner-console.html` in the repository. It can check API ke
 
 In the backend deployment's server-side environment settings, add:
 
-- `ORACLE_OWNER_TOKEN`: a long, random secret used only for owner-console access.
+- `ORACLE_OWNER_TOKEN_2`: a long, random secret used only for owner-console access. The backend also accepts the legacy `ORACLE_OWNER_TOKEN` if `_2` is not set.
 - `ORACLE_API_KEYS` or `ORACLE_API_KEY`: chat provider key(s), server-side only.
 - `ORACLE_NAMING_API_KEYS` / `ORACLE_NAMING_API_KEY`: optional title-generation key pool.
 - `TAVILY_API_KEYS` or `TAVILY_API_KEY`: optional web-search key(s).
