@@ -240,7 +240,7 @@ export async function POST(request: NextRequest) {
               title: String(item.title || "Web result").slice(0, 240),
               url: String(item.url || "").slice(0, 1000),
               content: String(item.content || "").slice(0, 1800),
-            })).filter(item => /^https?:\\/\\//i.test(item.url) && item.content);
+            })).filter(item => /^https?:\/\//i.test(item.url) && item.content);
             if (webSources.length) break;
           }
         } catch {
