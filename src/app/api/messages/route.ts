@@ -394,6 +394,14 @@ export async function POST(request: NextRequest) {
           }
         }
       }
+      if (webSources.length) {
+        const sourceSummary = webSources.slice(0, 5).map((item, i) => (i + 1) + ". [" + item.title + "](" + item.url + ")\\n" + item.content).join("\\n\\n");
+        return NextResponse.json({
+          reply: "I couldn't get a working response from the configured AI provider, so I won't pretend the model answered. I did retrieve these web sources as a fallback; please verify the details directly:\\n\\n" + sourceSummary,
+          webSources: webSources.map(({ title, url }) => ({ title, url })),
+          fallback: "web-search",
+        }, { headers });
+      }
       const exhaustedMessage = [401, 402, 403, 429].includes(upstream.status)
         ? `All ${attemptedKeys} configured API key attempt(s) were exhausted or rejected. Last provider response: ${message}`
         : message;
