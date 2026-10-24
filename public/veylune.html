@@ -922,7 +922,7 @@ $('menuBtn').addEventListener('click',()=>{$('sidebar').classList.add('open');$(
 loadChats();
 openChat(activeChatId);
 // Permanent public backend endpoint. The secret API key stays on Vercel.
-window.ORACLE_API_URL = 'https://oracle-sepia-one.vercel.app/api/messages';
+window.ORACLE_API_URL = location.hostname.endsWith('github.io') ? 'https://veylune-cyber-0ab0.vercel.app/api/messages' : location.origin + '/api/messages';
 // Set this to the deployed backend URL after deploying the Next.js API, e.g.
 // window.ORACLE_API_URL = 'https://your-oracle-backend.vercel.app/api/messages';
 if(window.ORACLE_API_URL || localStorage.getItem('oracleApiUrl')) {
