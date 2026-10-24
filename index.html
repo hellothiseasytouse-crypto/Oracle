@@ -1099,33 +1099,6 @@ button,.nav-action,.side-link,.history-item{transition:background-color .16s eas
 button:active{transform:translateY(1px)}
 @media(max-width:760px){.app{grid-template-columns:minmax(0,1fr)}.main{min-width:0}.composer{max-width:100%}}
 </style>
-<style id="oraacle-final-layout-fix">
 
-/* FINAL CASCADE FIX: must come after all legacy layout overrides */
-@media (min-width:761px) {
- html, body { width:100% !important; min-width:0 !important; overflow-x:hidden !important; }
- body .app { display:grid !important; width:100% !important; max-width:100% !important; min-width:0 !important; grid-template-columns:390px minmax(0,1fr) !important; column-gap:0 !important; }
- body .main { min-width:0 !important; width:100% !important; max-width:100% !important; margin:0 !important; padding-left:0 !important; }
- body .topbar { width:100% !important; min-width:0 !important; }
- body .chat-wrap { width:min(1080px,100%) !important; max-width:100% !important; min-width:0 !important; margin-left:auto !important; margin-right:auto !important; }
- body.sidebar-collapsed .app { grid-template-columns:64px minmax(0,1fr) !important; }
- body.sidebar-collapsed .sidebar { display:flex !important; visibility:visible !important; width:64px !important; min-width:64px !important; max-width:64px !important; padding:12px 6px !important; margin:0 !important; border-right:1px solid #242428 !important; overflow:hidden !important; }
- body.sidebar-collapsed .sidebar > * { display:flex !important; }
- body.sidebar-collapsed .sidebar .sidebar-head { width:100% !important; justify-content:center !important; padding:0 0 8px !important; }
- body.sidebar-collapsed .sidebar .brand { flex:none !important; justify-content:center !important; padding:0 !important; }
- body.sidebar-collapsed .sidebar .brand > div:last-child,
- body.sidebar-collapsed .sidebar .sidebar-scroll,
- body.sidebar-collapsed .sidebar .side-bottom,
- body.sidebar-collapsed .sidebar .nav-action span { display:none !important; }
- body.sidebar-collapsed .sidebar .side-nav { display:flex !important; flex-direction:column !important; width:100% !important; }
- body.sidebar-collapsed .sidebar .nav-action { display:flex !important; justify-content:center !important; width:100% !important; min-width:0 !important; padding:10px 0 !important; }
-}
-@media (max-width:760px) {
- body .app { display:grid !important; grid-template-columns:minmax(0,1fr) !important; width:100% !important; min-width:0 !important; }
- body .main { width:100% !important; min-width:0 !important; }
- body.sidebar-collapsed .app { grid-template-columns:minmax(0,1fr) !important; }
-}
-
-</style>
 </body>
 </html>
