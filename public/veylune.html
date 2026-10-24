@@ -457,35 +457,7 @@ html{scroll-behavior:smooth}body{background:radial-gradient(ellipse at 72% -8%,#
 @media(min-width:1200px){.chat-wrap{width:min(1160px,100%)!important}.message .bubble{max-width:min(980px,calc(100% - 44px))!important}}
 @media(max-width:760px){.chat-wrap{width:100%!important;padding:26px 16px 18px!important}.message .bubble{max-width:calc(100% - 38px)!important}.oracle-memory-page .memory-list{grid-template-columns:minmax(0,1fr)!important}}
 </style>
-<style id="oraacle-live-layout-fix">
 
-/* Oraacle real UI layout fix — this is the HTML loaded by the live Next.js iframe */
-@media (min-width:761px) {
- html,body {width:100%!important;min-width:0!important;max-width:100%!important;overflow-x:hidden!important}
- body .app {display:grid!important;width:100%!important;max-width:100%!important;min-width:0!important;grid-template-columns:260px minmax(0,1fr)!important;column-gap:0!important}
- body .sidebar {width:260px!important;min-width:260px!important;max-width:260px!important;min-height:100vh}
- body .main {width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important}
- body .topbar {width:100%!important;min-width:0!important}
- body .chat-wrap {width:min(1080px,100%)!important;max-width:100%!important;min-width:0!important;margin-left:auto!important;margin-right:auto!important}
- body.sidebar-collapsed .app {grid-template-columns:64px minmax(0,1fr)!important}
- body.sidebar-collapsed .sidebar {display:flex!important;visibility:visible!important;width:64px!important;min-width:64px!important;max-width:64px!important;height:100vh!important;padding:12px 6px!important;margin:0!important;border-right:1px solid #242428!important;overflow:hidden!important;gap:12px!important}
- body.sidebar-collapsed .sidebar>* {display:flex!important}
- body.sidebar-collapsed .sidebar .sidebar-head {width:100%!important;justify-content:center!important;padding:0 0 8px!important}
- body.sidebar-collapsed .sidebar .brand {display:flex!important;flex:none!important;justify-content:center!important;padding:0!important;gap:0!important}
- body.sidebar-collapsed .sidebar .brand>div:last-child,
- body.sidebar-collapsed .sidebar .sidebar-scroll,
- body.sidebar-collapsed .sidebar .side-bottom,
- body.sidebar-collapsed .sidebar .nav-action span {display:none!important}
- body.sidebar-collapsed .sidebar .side-nav {display:flex!important;flex-direction:column!important;width:100%!important;min-width:0!important}
- body.sidebar-collapsed .sidebar .nav-action {display:flex!important;justify-content:center!important;width:100%!important;min-width:0!important;padding:10px 0!important}
-}
-@media (max-width:760px) {
- body .app {display:grid!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;min-width:0!important}
- body .main {width:100%!important;min-width:0!important}
- body.sidebar-collapsed .app {grid-template-columns:minmax(0,1fr)!important}
-}
-
-</style>
 </head>
 <body>
 <div class="app">
