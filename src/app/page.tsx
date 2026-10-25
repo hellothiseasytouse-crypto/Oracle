@@ -95,6 +95,16 @@ export default function Home() {
         <div style={{ fontSize: "clamp(21px, 3vw, 32px)", lineHeight: 1.35, fontWeight: 300, maxWidth: 820 }}>{crash.headline}</div>
         <div style={{ fontSize: "clamp(16px, 2vw, 22px)", marginTop: 18, fontWeight: 300 }}>{crash.detail}</div>
         <div style={{ fontSize: "clamp(16px, 2vw, 22px)", marginTop: 8, fontWeight: 300 }}>{progress}% complete</div>
+        <div
+          role="progressbar"
+          aria-label="Crash diagnostic progress"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progress}
+          style={{ marginTop: 14, width: "min(100%, 420px)", height: 8, border: "1px solid rgba(255,255,255,0.85)", borderRadius: 2, background: "rgba(0,0,0,0.18)", overflow: "hidden" }}
+        >
+          <div style={{ width: String(progress) + "%", height: "100%", background: "#fff", transition: "width 250ms linear" }} />
+        </div>
         <div style={{ marginTop: 42, fontSize: 14, lineHeight: 1.7, opacity: 0.96 }}>
           <div>Stop code: {crash.code}</div>
           <div>What failed: {crash.failed}</div>
