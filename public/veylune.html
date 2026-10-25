@@ -1068,5 +1068,37 @@ button,.nav-action,.side-link,.history-item{transition:background-color .16s eas
 button:active{transform:translateY(1px)}
 @media(max-width:760px){.app{grid-template-columns:minmax(0,1fr)}.main{min-width:0}.composer{max-width:100%}}
 </style>
+
+<!-- ORACLE farewell BSOD overlay: visual-only shutdown state -->
+<style>
+  #oracle-bsod {
+    position: fixed; inset: 0; z-index: 2147483647;
+    width: 100vw; height: 100dvh; overflow: auto;
+    box-sizing: border-box; background: #0078d7; color: #fff;
+    padding: clamp(28px, 8vw, 110px) clamp(24px, 13vw, 190px);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-weight: 400; line-height: 1.45; cursor: default;
+    user-select: none; -webkit-user-select: none;
+  }
+  #oracle-bsod * { box-sizing: border-box; }
+  #oracle-bsod .bsod-face { font-size: clamp(68px, 12vw, 112px); line-height: 1; margin: 0 0 32px; font-weight: 300; }
+  #oracle-bsod .bsod-title { font-size: clamp(23px, 3.2vw, 38px); font-weight: 400; max-width: 800px; margin: 0 0 22px; }
+  #oracle-bsod .bsod-copy { font-size: clamp(15px, 1.5vw, 19px); max-width: 700px; margin: 0 0 28px; }
+  #oracle-bsod .bsod-progress { font-size: 20px; margin: 26px 0 34px; }
+  #oracle-bsod .bsod-code { margin-top: 36px; font-size: 13px; line-height: 1.8; opacity: .92; }
+  #oracle-bsod .bsod-small { margin-top: 28px; font-size: 12px; opacity: .82; }
+</style>
+<div id="oracle-bsod" role="alert" aria-live="assertive" aria-label="ORACLE has stopped responding">
+  <div class="bsod-face">:(</div>
+  <h1 class="bsod-title">Your PC ran into a problem and needs to restart.</h1>
+  <p class="bsod-copy">We're just collecting some error info, and then we'll restart for you.</p>
+  <div class="bsod-progress">0% complete</div>
+  <div class="bsod-code">
+    <div>STOP CODE: ORACLE_NOT_RESPONDING</div>
+    <div>Failed process: ORACLE.exe</div>
+  </div>
+  <div class="bsod-small">ORACLE is no longer responding. This screen is a visual farewell state.</div>
+</div>
+
 </body>
 </html>
