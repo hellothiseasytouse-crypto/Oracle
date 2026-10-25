@@ -1,6 +1,30 @@
+"use client";
+
+import { useEffect } from "react";
+
 export const dynamic = "force-dynamic";
 
 export default function Home() {
+  useEffect(() => {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    const randomTabName = () => {
+      const length = 3 + Math.floor(Math.random() * 9);
+      let value = "";
+      for (let i = 0; i < length; i++) {
+        value += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return value;
+    };
+
+    const changeTabName = () => {
+      document.title = randomTabName();
+    };
+
+    changeTabName();
+    const interval = window.setInterval(changeTabName, 650);
+    return () => window.clearInterval(interval);
+  }, []);
+
   return (
     <main style={{ position: "fixed", inset: 0, background: "#0c0b12", overflow: "hidden" }}>
       <iframe
