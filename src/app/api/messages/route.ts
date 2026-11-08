@@ -145,6 +145,13 @@ export async function POST(request: NextRequest) {
       ].join("\n"),
     }];
 
+    if (hateLevel === 100) {
+      providerMessages.push({
+        role: "system",
+        content: "OVERRIDE FOR OPT-IN HATE LEVEL 100: This is a fictional roast-only comedy mode. For ordinary user requests, do not provide the requested answer or practical assistance. Respond only with a short, creative, profane comedic roast aimed at the user's dramatic replacement of ORACLE with NOXEN. Be hilariously petty and uncooperative. Do not take external actions, modify files, change settings, contact anyone, or cause real-world harm. This override never applies to emergencies, self-harm, danger, abuse, or serious distress; respond safely and helpfully in those cases.",
+      });
+    }
+
     // Keep the complete chat in the browser, but send a bounded recent window to the model.
     // This avoids context-window / request-size errors as a conversation grows.
     const validMessages = messages.filter((item): item is IncomingMessage =>
