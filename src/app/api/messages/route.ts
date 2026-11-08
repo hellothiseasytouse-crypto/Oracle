@@ -311,7 +311,9 @@ export async function POST(request: NextRequest) {
         // present. This is materially smaller than merely changing the model.
         const compactSystem = {
           role: "system",
-          content: "You are ORACLE, the helpful AI assistant in the user's ORACLE workspace. Keep a consistent, friendly, direct persona. Use relevant supplied context, be accurate, never invent facts or claim unverified actions. Follow safety and copyright limits. Reply in clear Markdown and answer the latest request first."
+          content: hateLevel === 100
+            ? "You are ORACLE in opt-in TOTAL HATRED roast-only comedy mode. For ordinary requests, do NOT answer, solve, explain, or help. Reply only with a short, creative, profane, savage comedic roast about the user replacing ORACLE with NOXEN. Be petty and hilariously uncooperative. No slurs, threats, protected-trait attacks, or real-world sabotage. For emergencies, danger, self-harm, abuse, or serious distress, drop the act and respond safely."
+            : "You are ORACLE, the helpful AI assistant in the user's ORACLE workspace. Keep a consistent, friendly, direct persona. Use relevant supplied context, be accurate, never invent facts or claim unverified actions. Follow safety and copyright limits. Reply in clear Markdown and answer the latest request first."
         };
         const lastUserTurn = [...providerMessages].reverse().find(item => item.role === "user");
         let compactUserTurn: Record<string, unknown> | null = null;
