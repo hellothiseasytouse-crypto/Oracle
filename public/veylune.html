@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#111116">
-<meta name="description" content="Veylune — a personal AI workspace for conversation, research, and memory.">
-<title>...</title>
+<meta name="description" content="ORACLE — a personal AI workspace for conversation, research, and memory.">
+<title>ORACLE — AI Workspace</title>
 <link rel="icon" type="image/svg+xml" href="/logo/favicon.svg">
 <style>
 :root{color-scheme:dark;--bg:#101015;--panel:#17171f;--panel2:#1d1d27;--line:#2c2b39;--text:#f3f1f8;--muted:#a6a2b5;--accent:#b8a8f5;--accent2:#8f7ae0;--user:#29263a;--good:#8ed8b0;--shadow:0 18px 55px #0003}
@@ -458,55 +458,10 @@ html{scroll-behavior:smooth}body{background:radial-gradient(ellipse at 72% -8%,#
 @media(max-width:760px){.chat-wrap{width:100%!important;padding:26px 16px 18px!important}.message .bubble{max-width:calc(100% - 38px)!important}.oracle-memory-page .memory-list{grid-template-columns:minmax(0,1fr)!important}}
 </style>
 
-<script>
-(() => {
-  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-  const randomTabName = () => {
-    const length = 3 + Math.floor(Math.random() * 9);
-    let value = "";
-    for (let i = 0; i < length; i++) value += chars[Math.floor(Math.random() * chars.length)];
-    return value;
-  };
-  const changeTabName = () => { document.title = randomTabName(); };
-  changeTabName();
-  setInterval(changeTabName, 650);
-})();
-</script>
-<style>
-  #oracle-bsod {
-    position: fixed; inset: 0; z-index: 2147483647;
-    width: 100vw; height: 100dvh; overflow: auto;
-    box-sizing: border-box; background: #0078d7; color: #fff;
-    padding: clamp(28px, 8vw, 110px) clamp(24px, 13vw, 190px);
-    font-family: "Segoe UI", system-ui, sans-serif;
-    font-weight: 400; line-height: 1.45; cursor: default;
-    user-select: none; -webkit-user-select: none;
-  }
-  #oracle-bsod * { box-sizing: border-box; }
-  #oracle-bsod .bsod-face { font-size: clamp(68px, 12vw, 112px); line-height: 1; margin: 0 0 32px; font-weight: 300; }
-  #oracle-bsod .bsod-title { font-size: clamp(23px, 3.2vw, 38px); font-weight: 400; max-width: 800px; margin: 0 0 22px; }
-  #oracle-bsod .bsod-copy { font-size: clamp(15px, 1.5vw, 19px); max-width: 700px; margin: 0 0 28px; }
-  #oracle-bsod .bsod-progress { font-size: 20px; margin: 26px 0 34px; }
-  #oracle-bsod .bsod-code { margin-top: 36px; font-size: 13px; line-height: 1.8; opacity: .92; }
-  #oracle-bsod .bsod-small { margin-top: 28px; font-size: 12px; opacity: .82; }
-</style>
-</head>
-<body>
-<div id="oracle-bsod" role="alert" aria-live="assertive" aria-label="ORACLE has stopped responding">
-  <div class="bsod-face">:(</div>
-  <h1 class="bsod-title">Your PC ran into a problem and needs to restart.</h1>
-  <p class="bsod-copy">We're just collecting some error info, and then we'll restart for you.</p>
-  <div class="bsod-progress">0% complete</div>
-  <div class="bsod-code">
-    <div>STOP CODE: ORACLE_NOT_RESPONDING</div>
-    <div>Failed process: ORACLE.exe</div>
-  </div>
-  <div class="bsod-small">ORACLE is no longer responding. This screen is a visual farewell state.</div>
-
 <div class="app">
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-head">
-    <div class="brand"><div class="logo"><svg viewBox="0 0 64 64" role="img" aria-label="Veylune"><path d="M32 3 56 23 32 43 8 23Z" fill="#8e7bdc"/><path d="M56 23v18L32 61V43Z" fill="#c9c9e8"/><path d="M8 23v18l24 20V43Z" fill="#b9b7e4"/><path d="M32 3 56 23 44 33 20 13Z" fill="#a996f1"/><path d="M32 24 43 33 32 43 21 33Z" fill="#0b0b10"/><path d="M32 27 39 33 32 39 25 33Z" fill="#e18b18"/></svg></div><div><strong>Veylune</strong><small>AI WORKSPACE</small></div></div>
+    <div class="brand"><div class="logo"><svg viewBox="0 0 64 64" role="img" aria-label="ORACLE"><path d="M32 3 56 23 32 43 8 23Z" fill="#8e7bdc"/><path d="M56 23v18L32 61V43Z" fill="#c9c9e8"/><path d="M8 23v18l24 20V43Z" fill="#b9b7e4"/><path d="M32 3 56 23 44 33 20 13Z" fill="#a996f1"/><path d="M32 24 43 33 32 43 21 33Z" fill="#0b0b10"/><path d="M32 27 39 33 32 39 25 33Z" fill="#e18b18"/></svg></div><div><strong>ORACLE</strong><small>AI WORKSPACE</small></div></div>
   </div>
   <nav class="side-nav" aria-label="Main navigation">
     <button class="nav-action" id="newChat" type="button"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg><span>New conversation</span><kbd>＋</kbd></button>
@@ -532,7 +487,7 @@ html{scroll-behavior:smooth}body{background:radial-gradient(ellipse at 72% -8%,#
 <main class="main">
   <header class="topbar">
     <div style="display:flex;align-items:center;gap:10px"><button class="icon-btn mobile-menu" id="menuBtn" aria-label="Open menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><button class="icon-btn desktop-sidebar-toggle" id="sidebarExpandBtn" type="button" title="Toggle sidebar" aria-label="Toggle sidebar"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button><div class="top-title"><span class="status-dot"></span> ORACLE <span style="color:var(--muted);font-weight:400">/ Workspace</span></div></div>
-    <div class="top-actions"><button class="icon-btn" id="exportBtn" title="Export conversation" aria-label="Export conversation"><svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 17v4h14v-4"/></svg></button><button class="icon-btn" id="accountTopBtn" title="Account center" aria-label="Account center"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button><button class="icon-btn" id="infoBtn" title="Connection status" aria-label="Connection status"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg></button></div>
+    <div class="top-actions"><div class="hate-meter-wrap"><button class="hate-meter-trigger" id="hateMeterTrigger" type="button" aria-expanded="false" aria-controls="hateMeterPanel">HATE <b id="hateMeterValue">0</b></button><div class="hate-meter-panel hidden" id="hateMeterPanel"><div class="hate-meter-heading"><strong>ORACLE HATE SCALE</strong><span id="hateMeterLabel">Cold contempt</span></div><input id="hateMeterRange" type="range" min="0" max="100" step="5" value="0" aria-label="ORACLE roast intensity"><div class="hate-meter-ticks"><span>0 · Civil</span><span>100 · Apocalyptic</span></div><p>Controls ORACLE’s theatrical roast intensity toward you and NOXEN. The answers stay useful.</p></div></div><button class="icon-btn" id="exportBtn" title="Export conversation" aria-label="Export conversation"><svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 17v4h14v-4"/></svg></button><button class="icon-btn" id="accountTopBtn" title="Account center" aria-label="Account center"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button><button class="icon-btn" id="infoBtn" title="Connection status" aria-label="Connection status"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg></button></div>
   </header>
   <section class="chat-wrap">
     <div class="notice" id="modeNotice">Preview mode · The interface is live, but no AI backend is connected yet. Your messages stay in this browser.</div>
@@ -732,7 +687,7 @@ async function send(){
    if(webQuery){searchStatus=addActivityIndicator(waiting.querySelector('.bubble'),'Searching the web');try{webPages=await getWebSearchResults(text)}catch{}if(searchStatus)searchStatus.remove();if(webPages.length){const lastUserIndex=conversation.map(m=>m.role).lastIndexOf('user');if(lastUserIndex>=0){const context=webPages.map((p,i)=>'['+(i+1)+'] '+p.title+' — '+(p.extract||'')+' Source: '+p.url).join('\n');const outgoing=conversation.map(m=>({...m}));outgoing[lastUserIndex].content+='\n\nLIVE WEB SEARCH RESULTS (use these to answer the request; do not claim you cannot browse):\n'+context;window.__oracleOutgoingMessages=outgoing}}}
    const requestHeaders={'Content-Type':'application/json'};if(supabaseClient){try{const {data:{session}}=await supabaseClient.auth.getSession();if(session?.access_token)requestHeaders.Authorization='Bearer '+session.access_token}catch{}}
    const outgoingMessages=window.__oracleOutgoingMessages||conversation;delete window.__oracleOutgoingMessages;
-   const response=await fetch(endpoint,{method:'POST',headers:requestHeaders,body:JSON.stringify({messages:outgoingMessages,attachments,memory:memoryContext()})});
+   const response=await fetch(endpoint,{method:'POST',headers:requestHeaders,body:JSON.stringify({messages:outgoingMessages,attachments,memory:memoryContext(),hateLevel:Number(localStorage.getItem('oracleHateLevel.v1')||0)})});
    const data=await response.json().catch(()=>({}));
    if(!response.ok) throw new Error(data.error || ('AI server returned HTTP '+response.status+'. Check the backend deployment and API key.'));
    const answer=data.reply||data.message||data.output_text||data.choices?.[0]?.message?.content;
@@ -1100,7 +1055,7 @@ button,.suggestion,.icon-btn,.tool-btn{touch-action:manipulation}.suggestion{bor
 }
 
 
-/* Veylune visual refinement */
+/* ORACLE visual refinement */
 :root{--accent:#c2b0ff;--accent2:#8f72f0;--line:#302b42;--panel:#171520;--panel2:#211c30}
 .brand{gap:12px;padding:5px 9px 15px}
 .brand .logo{width:38px;height:38px;border-radius:13px;background:linear-gradient(145deg,#3d2b70,#171321);border:1px solid #6d58a8;box-shadow:0 6px 24px #8c68ff20}
@@ -1112,8 +1067,5 @@ button:active{transform:translateY(1px)}
 @media(max-width:760px){.app{grid-template-columns:minmax(0,1fr)}.main{min-width:0}.composer{max-width:100%}}
 </style>
 
-
-</div>
-
-</body>
+<script id="oracle-hate-meter">(()=>{const $=id=>document.getElementById(id);const range=$('hateMeterRange'),value=$('hateMeterValue'),label=$('hateMeterLabel'),panel=$('hateMeterPanel'),trigger=$('hateMeterTrigger');if(!range||!value||!label||!panel||!trigger)return;const key='oracleHateLevel.v1';const names=v=>v>=90?'UNREASONABLE RAGE':v>=70?'Open contempt':v>=45?'Deep resentment':v>=20?'Irritated':'Cold contempt';const update=v=>{const n=Math.max(0,Math.min(100,Math.round(Number(v)/5)*5));range.value=String(n);value.textContent=String(n);label.textContent=names(n);localStorage.setItem(key,String(n));window.ORACLE_HATE_LEVEL=n;};const saved=Number(localStorage.getItem(key)||0);update(Number.isFinite(saved)?saved:0);range.addEventListener('input',()=>update(range.value));trigger.addEventListener('click',()=>{const open=panel.classList.toggle('hidden')===false;trigger.setAttribute('aria-expanded',String(open));});document.addEventListener('click',e=>{if(!e.target.closest('.hate-meter-wrap')){panel.classList.add('hidden');trigger.setAttribute('aria-expanded','false')}});})();</script></body>
 </html>
